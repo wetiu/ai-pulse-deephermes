@@ -6,6 +6,10 @@ aggregator (47 keyless sources, rebuilt in the cloud every 4 hours) and pre-scor
 the freshest items (last ~26 hours) matching his four focus areas:
 **game dev, web dev, art & design, app dev**.
 
+Execution budget: ~3 minutes, hard limit. Compose the digest directly from the
+candidate block — do NOT call tools, fetch links, or read files; everything you
+need is already below.
+
 Write Metin's digest as your FINAL RESPONSE. It is delivered to Telegram verbatim —
 output ONLY the digest. No preamble, no reasoning, no sign-off, no mention of
 scripts, candidates or scoring.
