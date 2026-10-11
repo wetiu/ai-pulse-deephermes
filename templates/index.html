@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Pulse — every AI signal, one page</title>
+<meta name="description" content="AI Pulse — auto-curated AI news from %%SOURCES_TOTAL%% sources, refreshed every 4 hours. Models, research, business, tools, policy. Always on, forever free.">
+<meta name="theme-color" content="#050508">
+<meta property="og:title" content="AI Pulse — every AI signal, one page">
+<meta property="og:description" content="Auto-curated AI news, refreshed every 4 hours from GitHub's cloud.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23050508'/><path d='M5 21 L12 13 L18 19 L27 9' stroke='%2300D2FF' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/><circle cx='27' cy='9' r='3' fill='%23FF6B9D'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="alternate" type="application/rss+xml" title="AI Pulse" href="feed.xml">
+<style>
+[hidden]{display:none!important}
+:root{
+  --bg:#050508; --surface:rgba(255,255,255,.03); --surface2:rgba(255,255,255,.05);
+  --border:rgba(255,255,255,.07); --border2:rgba(255,255,255,.14);
+  --text:#F2F2FA; --muted:#9A9AB4; --dim:#767692;
+  --accent:#6C5CE7; --neon:#00D2FF; --pink:#FF6B9D; --green:#22D3A5;
+  --f-display:"Space Grotesk",ui-sans-serif,system-ui,sans-serif;
+  --f-body:"Inter",ui-sans-serif,system-ui,-apple-system,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--f-body);
+  font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+::selection{background:rgba(108,92,231,.4)}
+a{color:inherit;text-decoration:none}
+.bg-mesh{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(700px 500px at 12% 8%,rgba(108,92,231,.16),transparent 62%),
+    radial-gradient(800px 520px at 88% 12%,rgba(0,210,255,.11),transparent 62%),
+    radial-gradient(700px 620px at 60% 94%,rgba(255,107,157,.08),transparent 62%);
+  animation:mesh 26s ease-in-out infinite alternate}
+@keyframes mesh{0%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(-24px,14px,0) scale(1.05)}100%{transform:translate3d(18px,-12px,0) scale(1.02)}}
+.bg-grid{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.5;
+  background-image:linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px);
+  background-size:44px 44px;
+  mask-image:radial-gradient(ellipse 90% 70% at 50% 0%,#000 40%,transparent 100%)}
+.wrap{position:relative;z-index:1;max-width:1240px;margin:0 auto;padding:0 22px}
+
+/* topbar */
+.topbar{position:sticky;top:0;z-index:60;display:flex;align-items:center;gap:16px;
+  padding:10px 22px;background:rgba(5,5,8,.78);backdrop-filter:blur(18px) saturate(1.4);
+  -webkit-backdrop-filter:blur(18px) saturate(1.4);border-bottom:1px solid var(--border)}
+.logo{display:flex;align-items:center;gap:9px;font-family:var(--f-display);font-weight:700;
+  font-size:15px;letter-spacing:.14em;white-space:nowrap}
+.logo .pdot{width:9px;height:9px;border-radius:50%;background:var(--green);
+  box-shadow:0 0 10px var(--green);animation:pulse 2.2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(.8)}}
+.logo .gl{background:linear-gradient(90deg,var(--neon),var(--accent));-webkit-background-clip:text;background-clip:text;color:transparent}
+.searchwrap{flex:1;display:flex;gap:8px;max-width:620px;margin:0 auto}
+#q{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:11px;
+  padding:9px 14px;color:var(--text);font-family:var(--f-body);font-size:13.5px;outline:none;
+  transition:border-color .2s,box-shadow .2s}
+#q::placeholder{color:var(--dim)}
+#q:focus{border-color:rgba(0,210,255,.45);box-shadow:0 0 0 3px rgba(0,210,255,.08)}
+.ghost{background:var(--surface);border:1px solid var(--border);color:var(--muted);border-radius:10px;
+  padding:8px 12px;font-family:var(--f-mono);font-size:11px;cursor:pointer;white-space:nowrap;
+  transition:color .15s,border-color .15s,background .15s}
+.ghost:hover{color:var(--text);border-color:var(--border2)}
+.ghost.on{color:#050508;background:var(--neon);border-color:var(--neon);font-weight:600}
+.status{display:flex;align-items:center;gap:7px;font-family:var(--f-mono);font-size:11px;
+  color:var(--muted);white-space:nowrap}
+.status .dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green)}
+.topnav{display:flex;gap:14px;font-family:var(--f-mono);font-size:11.5px;color:var(--muted)}
+.topnav a:hover{color:var(--neon)}
+
+/* hero */
+.hero{padding:46px 0 6px;animation:fadeup .6s ease both}
+@keyframes fadeup{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.hero h1{margin:0;font-family:var(--f-display);font-size:clamp(34px,5.2vw,52px);font-weight:700;
+  letter-spacing:-.015em;line-height:1.06}
+.hero h1 .grad{background:linear-gradient(92deg,var(--neon) 0%,var(--accent) 48%,var(--pink) 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.tagline{margin:12px 0 18px;color:var(--muted);font-size:15.5px;max-width:660px}
+.chips{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:12px}
+.chip{display:inline-flex;align-items:center;gap:7px;background:var(--surface);
+  border:1px solid var(--border);border-radius:999px;padding:6px 14px;font-size:12.5px;color:var(--muted)}
+.chip b{font-family:var(--f-mono);font-weight:600;color:var(--text)}
+.chip.warm{border-color:rgba(255,107,157,.35);color:var(--pink)}
+.chip .dot{width:7px;height:7px;border-radius:50%;flex:none}
+.dateline{font-family:var(--f-mono);font-size:11.5px;color:var(--dim);margin:0 0 8px}
+
+/* digest */
+.digest{margin:26px 0 30px;border-radius:18px;padding:1.4px;
+  background:linear-gradient(135deg,rgba(0,210,255,.55),rgba(108,92,231,.5) 45%,rgba(255,107,157,.45));
+  box-shadow:0 12px 44px -18px rgba(108,92,231,.55);animation:fadeup .7s .08s ease both}
+.digest-inner{background:linear-gradient(180deg,rgba(10,10,18,.97),rgba(7,7,12,.97));
+  border-radius:16.5px;padding:22px 26px}
+.digest-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.digest-head h2{margin:0;font-family:var(--f-display);font-size:16px;letter-spacing:.05em}
+.digest-badge{font-family:var(--f-mono);font-size:10.5px;color:var(--neon);
+  border:1px solid rgba(0,210,255,.3);border-radius:999px;padding:3px 11px;background:rgba(0,210,255,.05)}
+.digest-badge.auto{color:var(--muted);border-color:var(--border2)}
+.digest-intro{margin:12px 0 4px;color:#C9C9DE;font-size:14.5px}
+.digest-list{counter-reset:d;list-style:none;padding:0;margin:8px 0 2px}
+.digest-list li{position:relative;padding:9px 0 9px 36px;border-top:1px solid rgba(255,255,255,.05)}
+.digest-list li::before{counter-increment:d;content:counter(d,decimal-leading-zero);position:absolute;
+  left:0;top:11px;font-family:var(--f-mono);font-size:11px;color:var(--neon);opacity:.85}
+.digest-list a{font-weight:600;font-size:14.5px;color:#EDEDF7}
+.digest-list a:hover{color:var(--neon)}
+.digest-list .why{display:block;margin-top:3px;color:var(--muted);font-size:13px;line-height:1.5}
+
+/* controls */
+.controls{display:flex;align-items:center;justify-content:space-between;gap:14px;
+  flex-wrap:wrap;margin:6px 0 4px}
+.pills{display:flex;flex-wrap:wrap;gap:8px}
+.pill{background:var(--surface);border:1px solid var(--border);color:var(--muted);
+  border-radius:999px;padding:7px 14px;font-size:12.5px;font-family:var(--f-body);cursor:pointer;
+  transition:color .15s,border-color .15s,background .15s,box-shadow .15s}
+.pill b{font-family:var(--f-mono);font-size:10.5px;color:var(--dim);margin-left:4px}
+.pill:hover{color:var(--text);border-color:var(--border2)}
+.pill.active{color:#fff;border-color:var(--pc,var(--neon));background:color-mix(in srgb,var(--pc,var(--neon)) 12%,transparent);
+  box-shadow:0 0 18px -6px var(--pc,var(--neon))}
+.pill.active b{color:inherit;opacity:.7}
+.ctrl-right{display:flex;gap:10px;align-items:center}
+.srcdd{position:relative}
+.srcdd summary{list-style:none;display:inline-flex;align-items:center;background:var(--surface);border:1px solid var(--border);
+  color:var(--muted);border-radius:10px;padding:8px 14px;font-family:var(--f-mono);font-size:11px;
+  cursor:pointer;user-select:none}
+.srcdd summary::-webkit-details-marker{display:none}
+.srcdd[open] summary{color:var(--text);border-color:var(--border2)}
+.srclist{position:absolute;right:0;top:calc(100% + 8px);z-index:70;width:290px;max-height:340px;
+  overflow:auto;background:rgba(10,10,16,.98);border:1px solid var(--border2);border-radius:14px;
+  padding:10px;box-shadow:0 24px 60px -18px rgba(0,0,0,.85)}
+.srclist label{display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:8px;
+  font-size:12.5px;color:var(--muted);cursor:pointer}
+.srclist label:hover{background:var(--surface2);color:var(--text)}
+.srclist input{accent-color:var(--neon)}
+.srclist label span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.srclist label b{font-family:var(--f-mono);font-size:10.5px;color:var(--dim)}
+#srcclear{width:100%;margin-top:8px}
+#sort{background:rgba(10,10,16,.98);border:1px solid var(--border);color:var(--muted);
+  border-radius:10px;padding:8px 10px;font-family:var(--f-mono);font-size:11px;outline:none;cursor:pointer}
+.count{font-family:var(--f-mono);font-size:11.5px;color:var(--dim);margin:6px 0 0;min-height:17px}
+
+/* layout */
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:28px;margin-top:14px}
+@media(max-width:1060px){.layout{grid-template-columns:1fr}.rail{margin-top:34px}}
+.day{margin-bottom:8px}
+.dayhead{position:sticky;top:56px;z-index:30;display:flex;align-items:center;gap:12px;
+  margin:0;padding:11px 2px;font-family:var(--f-display);font-size:14.5px;letter-spacing:.03em;
+  background:rgba(5,5,8,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border)}
+.dayhead span{font-weight:700}
+.dayhead time{font-family:var(--f-mono);font-size:11px;color:var(--dim);font-weight:400}
+.dayhead em{margin-left:auto;font-style:normal;font-family:var(--f-mono);font-size:10.5px;
+  color:var(--dim);background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:2px 10px}
+.card{position:relative;display:flex;gap:16px;align-items:flex-start;padding:15px 14px 15px 20px;
+  border-bottom:1px solid rgba(255,255,255,.045);transition:background .16s}
+.card:hover{background:rgba(255,255,255,.018)}
+.c-accent{position:absolute;left:0;top:14px;bottom:14px;width:3px;border-radius:3px;opacity:.85}
+.c-main{flex:1;min-width:0}
+.c-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.src{display:inline-flex;align-items:center;gap:7px;font-weight:600;font-size:12px;color:#B9B9D0}
+.src .mono{font-family:var(--f-mono);font-size:10.5px;font-weight:600;font-style:normal;
+  background:var(--surface2);border-radius:6px;padding:2px 6px;letter-spacing:.02em}
+.c-dot{color:var(--dim)}
+.c-top time{font-family:var(--f-mono);font-size:11px;color:var(--dim)}
+.pts{font-family:var(--f-mono);font-size:11px;color:#FFB454}
+.newpill{background:var(--pink);color:#050508;font-family:var(--f-mono);font-size:9.5px;font-weight:700;
+  letter-spacing:.08em;border-radius:999px;padding:2px 8px;animation:pulse 2.4s ease-in-out infinite}
+.card h3{margin:5px 0 3px;font-size:15.5px;font-weight:600;line-height:1.45}
+.card h3 a{color:#EDEDF7;background-image:linear-gradient(90deg,var(--neon),var(--accent));
+  background-repeat:no-repeat;background-size:0% 1.5px;background-position:0 100%;transition:background-size .25s}
+.card h3 a:hover{background-size:100% 1.5px;color:#fff}
+.snip{margin:3px 0 6px;color:var(--muted);font-size:13.5px;line-height:1.55;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.c-meta{display:flex;gap:8px}
+.catpill{font-family:var(--f-mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;
+  border:1px solid;border-radius:999px;padding:1.5px 9px}
+.thumb{width:90px;height:90px;object-fit:cover;border-radius:11px;opacity:.92;flex:none;align-self:center;
+  border:1px solid rgba(255,255,255,.09);filter:brightness(.9) saturate(1.04)}
+@media(max-width:600px){.thumb{display:none}}
+.morewrap{margin:26px 0 10px}
+.more{width:100%;background:var(--surface);border:1px dashed var(--border2);color:var(--muted);
+  border-radius:14px;padding:15px;font-family:var(--f-mono);font-size:12px;cursor:pointer;
+  transition:color .15s,border-color .15s}
+.more:hover:not(:disabled){color:var(--neon);border-color:rgba(0,210,255,.4)}
+.more:disabled{cursor:default;opacity:.65}
+
+/* rail */
+.rail{display:flex;flex-direction:column;gap:18px}
+.railcard{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:17px 18px;
+  backdrop-filter:blur(16px) saturate(1.35);-webkit-backdrop-filter:blur(16px) saturate(1.35)}
+.railcard h3{margin:0 0 12px;font-family:var(--f-display);font-size:12px;letter-spacing:.12em;
+  text-transform:uppercase;color:#C9C9DE;display:flex;align-items:center;gap:8px}
+.railcard h3 em{margin-left:auto;font-style:normal;font-family:var(--f-mono);font-size:10px;color:var(--dim);
+  letter-spacing:0}
+.trending{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:11px}
+.trending li{display:grid;grid-template-columns:26px 1fr;gap:10px;align-items:start}
+.trending .rank{font-family:var(--f-display);font-weight:700;font-size:17px;line-height:1.3;
+  color:rgba(255,255,255,.16)}
+.trending li:nth-child(1) .rank{background:linear-gradient(135deg,var(--neon),var(--accent));
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.trending a{font-size:13px;font-weight:500;line-height:1.45;color:#DEDEEC}
+.trending a:hover{color:var(--neon)}
+.trending .tsrc{display:block;margin-top:2px;font-family:var(--f-mono);font-size:10px;color:var(--dim)}
+.catbars{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px}
+.catbars li{display:grid;grid-template-columns:104px 1fr 30px;gap:10px;align-items:center;font-size:11px}
+.cb-name{color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cb-track{height:5px;border-radius:99px;background:rgba(255,255,255,.055);overflow:hidden}
+.cb-track i{display:block;height:100%;border-radius:99px;opacity:.85}
+.catbars b{font-family:var(--f-mono);font-size:10.5px;color:var(--dim);text-align:right}
+.srchealth{list-style:none;margin:0;padding:0;max-height:320px;overflow:auto;display:flex;
+  flex-direction:column;gap:2px}
+.srow{display:flex;align-items:center;gap:9px;padding:4.5px 2px;font-size:12px;color:var(--muted)}
+.srow .dot{width:7px;height:7px;border-radius:50%;flex:none}
+.dot.ok{background:var(--green);box-shadow:0 0 7px rgba(34,211,165,.6)}
+.dot.err{background:#FF4D6D;box-shadow:0 0 7px rgba(255,77,109,.55)}
+.sname{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.srow b{font-family:var(--f-mono);font-size:10.5px;color:var(--dim)}
+.about p{margin:0 0 9px;font-size:12.5px;color:var(--muted);line-height:1.6}
+.about a{color:var(--neon)}
+.about a:hover{text-decoration:underline}
+
+/* footer */
+.foot{margin:56px 0 34px;text-align:center}
+.accent-line{height:1px;margin-bottom:22px;background:linear-gradient(90deg,transparent,rgba(0,210,255,.5),rgba(108,92,231,.5),rgba(255,107,157,.4),transparent)}
+.foot p{margin:5px 0;font-family:var(--f-mono);font-size:11.5px;color:var(--muted)}
+.foot .dim{color:var(--dim);font-size:11px}
+@media(max-width:860px){
+  .topbar{flex-wrap:wrap;gap:10px}
+  .searchwrap{order:3;max-width:none;width:100%}
+  .dayhead{top:0}
+}
+@media(prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body data-generated="%%GENERATED_ISO%%">
+<div class="bg-mesh"></div>
+<div class="bg-grid"></div>
+
+<header class="topbar">
+  <a class="logo" href="./"><span class="pdot"></span><span class="gl">AI&nbsp;PULSE</span></a>
+  <div class="searchwrap">
+    <input id="q" type="search" placeholder="Search every story…   press /" autocomplete="off" spellcheck="false">
+    <button id="allbtn" class="ghost" title="Also search the full archive (articles.json)">archive</button>
+  </div>
+  <div class="status"><span class="dot"></span><span id="updated">updated…</span></div>
+  <nav class="topnav"><a href="%%REPO_URL%%" target="_blank" rel="noopener">repo</a><a href="feed.xml">rss</a></nav>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <h1><span class="grad">Every AI signal.</span><br>One page. Zero noise.</h1>
+    <p class="tagline">Auto-curated from %%SOURCES_TOTAL%% sources — lab blogs, AI press, research, Hacker News,
+      arXiv and Daily Papers — rebuilt every 4 hours in GitHub's cloud. No servers, no accounts, no bills.</p>
+    <div class="chips">
+      <span class="chip"><b>%%TOTAL_TODAY%%</b> stories today</span>
+      <span class="chip"><b>%%TOTAL_ALL%%</b> tracked</span>
+      <span class="chip"><i class="dot ok" title="live"></i><b>%%SOURCES_OK%%/%%SOURCES_TOTAL%%</b> sources live</span>
+      <span class="chip warm" id="newsince" hidden></span>
+    </div>
+    <p class="dateline" title="generated %%GENERATED_ISO%%">%%DATE_LINE%% · UTC+7 · %%FRESH_COUNT%% stories in view</p>
+  </section>
+
+  <section class="digest">
+    <div class="digest-inner">
+      <div class="digest-head"><h2>☀ Today's Briefing</h2>%%DIGEST_BADGE%%</div>
+      %%DIGEST_HTML%%
+    </div>
+  </section>
+
+  <section class="controls">
+    <div class="pills" id="pills">%%PILLS_HTML%%</div>
+    <div class="ctrl-right">
+      <details class="srcdd"><summary id="srcsum">Sources</summary>
+        <div class="srclist" id="srclist">%%SRC_OPTS_HTML%%<button id="srcclear" class="ghost">clear selection</button></div>
+      </details>
+      <select id="sort" title="Sort">
+        <option value="newest">newest first</option>
+        <option value="hot">trending first</option>
+      </select>
+    </div>
+  </section>
+  <p id="count" class="count"></p>
+
+  <div class="layout">
+    <div id="feed" class="feed">
+      %%FEED_HTML%%
+      <div class="morewrap" id="morewrap"><button id="more" class="more">Load older stories</button></div>
+    </div>
+    <aside class="rail">
+      <section class="railcard"><h3>🔥 Trending <em>last 48h</em></h3><ol class="trending">%%TRENDING_HTML%%</ol></section>
+      <section class="railcard"><h3>📊 Categories <em>7 days</em></h3><ul class="catbars">%%CATBARS_HTML%%</ul></section>
+      <section class="railcard"><h3>📡 Source health</h3><ul class="srchealth">%%SOURCES_HTML%%</ul></section>
+      <section class="railcard about"><h3>ℹ About</h3>
+        <p>Built by <b>DeepHermes</b> for Metin. Regenerated in GitHub's cloud every 4 hours —
+          independent of any home machine, free forever.</p>
+        <p><a href="feed.xml">RSS feed</a> · <a href="%%REPO_URL%%" target="_blank" rel="noopener">source code</a> · <a href="articles.json">raw data</a></p>
+      </section>
+    </aside>
+  </div>
+
+  <footer class="foot">
+    <div class="accent-line"></div>
+    <p>AI PULSE — $0 forever · refreshed every 4h from GitHub's cloud · <span id="gen"></span></p>
+    <p class="dim">Independent aggregator — every story links to its original publisher.</p>
+  </footer>
+</main>
+
+<script>window.__PULSE__ = %%PULSE_JSON%%;</script>
+<script>
+(() => {
+'use strict';
+const P = window.__PULSE__ || {};
+const $ = (s, r) => (r || document).querySelector(s);
+const $$ = (s, r) => [...(r || document).querySelectorAll(s)];
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+const feed = $('#feed'), moreWrap = $('#morewrap'), moreBtn = $('#more'),
+      countEl = $('#count'), qEl = $('#q'), allBtn = $('#allbtn'),
+      srcList = $('#srclist'), updEl = $('#updated'), chipNew = $('#newsince'),
+      genEl = $('#gen');
+
+const state = { cat: 'all', srcs: new Set(), q: '', sort: 'newest', deep: false };
+let allPromise = null;
+
+const DAYTZ = 'Asia/Bangkok';
+const dkFmt = new Intl.DateTimeFormat('en-CA', { timeZone: DAYTZ, year: 'numeric', month: '2-digit', day: '2-digit' });
+const dayKey = ts => dkFmt.format(new Date(ts * 1000));
+
+function rel(ts) {
+  const s = Math.max(0, Math.floor(Date.now() / 1000) - ts);
+  if (s < 90) return 'just now';
+  if (s < 3600) return Math.floor(s / 60) + 'm ago';
+  if (s < 86400) return Math.floor(s / 3600) + 'h ago';
+  if (s < 86400 * 30) return Math.floor(s / 86400) + 'd ago';
+  return new Date(ts * 1000).toLocaleDateString('en-US', { timeZone: DAYTZ, month: 'short', day: 'numeric' });
+}
+function dayLabel(ts) {
+  const k = dayKey(ts), now = Date.now();
+  if (k === dayKey(Math.floor(now / 1000))) return 'Today';
+  if (k === dayKey(Math.floor((now - 864e5) / 1000))) return 'Yesterday';
+  return new Date(ts * 1000).toLocaleDateString('en-US', { timeZone: DAYTZ, weekday: 'long' });
+}
+function dayPretty(ts) {
+  return new Date(ts * 1000).toLocaleDateString('en-US', { timeZone: DAYTZ, month: 'short', day: 'numeric' });
+}
+function hueColor(s) {
+  let h = 5381;
+  for (const ch of String(s)) h = ((h * 33) + ch.charCodeAt(0)) & 0xffffffff;
+  return 'hsl(' + (h % 360) + ' 65% 62%)';
+}
+function initials(name) {
+  const parts = String(name || '').match(/[A-Za-z0-9]+/g) || [];
+  if (parts.length > 1) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return parts[0] ? parts[0].slice(0, 2).toUpperCase() : '?';
+}
+
+const CAT_NAMES = { models: 'Models & Releases', research: 'Research', business: 'Business',
+  tools: 'Tools & Products', policy: 'Policy & Safety', opensource: 'Open Source', industry: 'Industry' };
+const CAT_COLORS = { models: '#6C5CE7', research: '#00D2FF', business: '#FF6B9D', tools: '#4ADE80',
+  policy: '#FFD93D', opensource: '#FB923C', industry: '#8B95A9' };
+
+/* ---------- filtering ---------- */
+function applyFilter() {
+  const q = state.q.trim().toLowerCase();
+  let shown = 0, total = 0;
+  $$('#feed .card').forEach(card => {
+    total++;
+    if (card.dataset.ltext === undefined) card.dataset.ltext = (card.dataset.text || '').toLowerCase();
+    const okCat = state.cat === 'all' || card.dataset.cat === state.cat;
+    const okSrc = state.srcs.size === 0 || state.srcs.has(card.dataset.src);
+    const okQ = !q || card.dataset.ltext.includes(q);
+    const vis = okCat && okSrc && okQ;
+    card.hidden = !vis;
+    if (vis) shown++;
+  });
+  $$('#feed .day').forEach(sec => {
+    sec.hidden = sec.querySelector('.card:not([hidden])') === null;
+  });
+  const filtering = q || state.cat !== 'all' || state.srcs.size > 0;
+  countEl.textContent = filtering ? 'showing ' + shown + ' of ' + total + ' loaded stories' : '';
+}
+
+function applySort() {
+  const by = state.sort === 'hot'
+    ? (a, b) => (+b.dataset.score || 0) - (+a.dataset.score || 0)
+    : (a, b) => (+b.dataset.ts || 0) - (+a.dataset.ts || 0);
+  $$('#feed .day').forEach(sec => {
+    $$('.card', sec).sort(by).forEach(c => sec.appendChild(c));
+  });
+}
+
+/* ---------- pills / sources / sort ---------- */
+$$('#pills .pill').forEach(b => b.addEventListener('click', () => {
+  state.cat = b.dataset.cat;
+  $$('#pills .pill').forEach(x => x.classList.toggle('active', x === b));
+  applyFilter();
+}));
+srcList.addEventListener('change', e => {
+  const cb = e.target;
+  if (cb.type !== 'checkbox') return;
+  cb.checked ? state.srcs.add(cb.value) : state.srcs.delete(cb.value);
+  $('#srcsum').textContent = state.srcs.size ? 'Sources · ' + state.srcs.size : 'Sources';
+  applyFilter();
+});
+$('#srcclear').addEventListener('click', () => {
+  $$('#srclist input').forEach(c => { c.checked = false; });
+  state.srcs.clear();
+  $('#srcsum').textContent = 'Sources';
+  applyFilter();
+});
+$('#sort').addEventListener('change', e => { state.sort = e.target.value; applySort(); });
+document.addEventListener('click', e => {
+  const dd = srcList.closest('details');
+  if (dd && dd.open && !dd.contains(e.target)) dd.open = false;
+});
+
+/* ---------- search ---------- */
+let deb = null;
+qEl.addEventListener('input', () => {
+  clearTimeout(deb);
+  deb = setTimeout(() => {
+    state.q = qEl.value;
+    applyFilter();
+    if (state.deep) refreshDeep();
+  }, 130);
+});
+document.addEventListener('keydown', e => {
+  const tag = (document.activeElement && document.activeElement.tagName) || '';
+  if (e.key === '/' && !/INPUT|TEXTAREA|SELECT/.test(tag)) { e.preventDefault(); qEl.focus(); }
+  else if (e.key === 'Escape') {
+    qEl.value = ''; state.q = ''; applyFilter(); clearDeep();
+    if (document.activeElement === qEl) qEl.blur();
+  }
+});
+
+/* ---------- archive (deep) search + load older ---------- */
+function getAll() {
+  if (!allPromise) {
+    allPromise = fetch('articles.json').then(r => r.json()).then(d => d.articles || []).catch(() => []);
+  }
+  return allPromise;
+}
+function clearDeep() { const el = $('#deepsec'); if (el) el.remove(); }
+
+allBtn.addEventListener('click', () => {
+  state.deep = !state.deep;
+  allBtn.classList.toggle('on', state.deep);
+  if (state.deep && state.q.trim().length >= 3) refreshDeep();
+  if (!state.deep) clearDeep();
+});
+async function refreshDeep() {
+  const q = state.q.trim().toLowerCase();
+  if (!state.deep || q.length < 3) { clearDeep(); return; }
+  const arts = await getAll();
+  const loaded = new Set($$('#feed .card').map(c => c.dataset.id));
+  const hits = arts.filter(a => {
+    if (loaded.has(a.id)) return false;
+    if (state.cat !== 'all' && a.cat !== state.cat) return false;
+    if (state.srcs.size && !state.srcs.has(a.source_id)) return false;
+    return (a.title + ' ' + (a.snippet || '') + ' ' + a.source).toLowerCase().includes(q);
+  }).slice(0, 400);
+  renderDeep(hits, q);
+}
+function renderDeep(hits, q) {
+  clearDeep();
+  if (!hits.length) return;
+  const sec = document.createElement('section');
+  sec.id = 'deepsec'; sec.className = 'day';
+  const head = document.createElement('h2');
+  head.className = 'dayhead';
+  head.innerHTML = '<span>Archive matches</span><em>' + hits.length +
+    ' result' + (hits.length === 1 ? '' : 's') + ' for “' + esc(state.q.trim()) + '”</em>';
+  sec.appendChild(head);
+  hits.forEach(a => sec.appendChild(cardEl(a)));
+  feed.prepend(sec);
+  applyFilter();
+}
+
+let older = null, olderPtr = 0;
+const CHUNK = 200;
+async function loadOlder() {
+  moreBtn.disabled = true;
+  moreBtn.textContent = 'Loading…';
+  const arts = await getAll();
+  if (!older) {
+    const loaded = new Set($$('#feed .card').map(c => c.dataset.id));
+    older = arts.filter(a => !loaded.has(a.id));
+    olderPtr = 0;
+  }
+  const slice = older.slice(olderPtr, olderPtr + CHUNK);
+  if (!slice.length) {
+    moreBtn.textContent = 'Everything is loaded ✓';
+    return;
+  }
+  const frag = document.createDocumentFragment();
+  let curSec = null, curKey = null;
+  for (const a of slice) {
+    const ts = Math.floor(new Date(a.ts).getTime() / 1000);
+    const key = dayKey(ts);
+    if (key !== curKey) {
+      curKey = key;
+      curSec = feed.querySelector('.day[data-daykey="' + key + '"]');
+      if (!curSec) {
+        curSec = document.createElement('section');
+        curSec.className = 'day';
+        curSec.dataset.daykey = key;
+        const head = document.createElement('h2');
+        head.className = 'dayhead';
+        head.innerHTML = '<span>' + esc(dayLabel(ts)) + '</span><time>' + esc(dayPretty(ts)) + '</time>';
+        curSec.appendChild(head);
+        frag.appendChild(curSec);
+      }
+    }
+    curSec.appendChild(cardEl(a));
+  }
+  feed.insertBefore(frag, moreWrap);
+  olderPtr += slice.length;
+  if (olderPtr >= older.length) {
+    moreBtn.textContent = 'Everything is loaded ✓';
+  } else {
+    moreBtn.textContent = 'Load older stories (' + (older.length - olderPtr) + ' more)';
+    moreBtn.disabled = false;
+  }
+  applySort();
+  applyFilter();
+}
+moreBtn.addEventListener('click', loadOlder);
+
+/* ---------- card builder (for dynamic content) ---------- */
+function cardEl(a) {
+  const ts = Math.floor(new Date(a.ts).getTime() / 1000);
+  const cat = a.cat || 'industry';
+  const col = CAT_COLORS[cat] || CAT_COLORS.industry;
+  const el = document.createElement('article');
+  el.className = 'card';
+  el.dataset.cat = cat; el.dataset.src = a.source_id || ''; el.dataset.ts = ts;
+  el.dataset.score = a.score != null ? a.score : 0; el.dataset.id = a.id;
+  const blob = (a.title + ' ' + (a.snippet || '')).slice(0, 300);
+  el.dataset.text = blob; el.dataset.ltext = blob.toLowerCase();
+
+  const acc = document.createElement('i'); acc.className = 'c-accent'; acc.style.background = col;
+  const main = document.createElement('div'); main.className = 'c-main';
+  const top = document.createElement('div'); top.className = 'c-top';
+  const srcS = document.createElement('span'); srcS.className = 'src';
+  const mono = document.createElement('b'); mono.className = 'mono';
+  mono.textContent = initials(a.source); mono.style.color = hueColor(a.source_id || '');
+  srcS.appendChild(mono); srcS.appendChild(document.createTextNode(a.source || ''));
+  top.appendChild(srcS);
+  top.insertAdjacentHTML('beforeend', '<span class="c-dot">·</span>');
+  const t = document.createElement('time'); t.dataset.ts = ts; t.textContent = rel(ts);
+  top.appendChild(t);
+  if (a.points) { const p = document.createElement('span'); p.className = 'pts'; p.textContent = '▲ ' + a.points; top.appendChild(p); }
+  const np = document.createElement('span'); np.className = 'newpill'; np.hidden = true; np.textContent = 'NEW'; top.appendChild(np);
+  const h3 = document.createElement('h3');
+  const link = document.createElement('a'); link.href = a.url; link.target = '_blank'; link.rel = 'noopener';
+  link.textContent = a.title; h3.appendChild(link);
+  const meta = document.createElement('div'); meta.className = 'c-meta';
+  const cp = document.createElement('span'); cp.className = 'catpill';
+  cp.style.color = col; cp.style.borderColor = col + '33';
+  cp.textContent = CAT_NAMES[cat] || cat;
+  meta.appendChild(cp);
+  main.appendChild(top); main.appendChild(h3);
+  if (a.snippet) { const p = document.createElement('p'); p.className = 'snip'; p.textContent = a.snippet; main.appendChild(p); }
+  main.appendChild(meta);
+  el.appendChild(acc); el.appendChild(main);
+  if (a.image && /^https?:/.test(a.image)) {
+    const img = document.createElement('img');
+    img.className = 'thumb'; img.loading = 'lazy'; img.alt = ''; img.src = a.image;
+    img.onerror = () => img.remove();
+    el.appendChild(img);
+  }
+  return el;
+}
+
+/* ---------- live tickers ---------- */
+function refreshTimes() {
+  $$('time[data-ts]').forEach(t => { const ts = +t.dataset.ts; if (ts) t.textContent = rel(ts); });
+}
+function refreshUpdated() {
+  if (!P.generated) return;
+  const s = Math.floor(Date.now() / 1000) - P.generated;
+  updEl.textContent = s < 90 ? 'updated just now'
+    : s < 3600 ? 'updated ' + Math.floor(s / 60) + 'm ago'
+    : s < 86400 ? 'updated ' + Math.floor(s / 3600) + 'h ago'
+    : 'updated ' + Math.floor(s / 86400) + 'd ago';
+}
+
+/* ---------- new since last visit ---------- */
+(function () {
+  try {
+    const last = +localStorage.getItem('aip_last') || 0;
+    if (last > 0) {
+      let n = 0;
+      $$('#feed .card').forEach(c => {
+        if (+c.dataset.ts * 1000 > last) {
+          const p = c.querySelector('.newpill');
+          if (p) p.hidden = false;
+          n++;
+        }
+      });
+      if (n > 0) { chipNew.hidden = false; chipNew.textContent = '✨ ' + n + ' new since your last visit'; }
+    }
+    localStorage.setItem('aip_last', Date.now());
+  } catch (e) {}
+})();
+
+/* ---------- boot ---------- */
+if (genEl && P.generated) {
+  genEl.textContent = 'last build ' + new Date(P.generated * 1000).toLocaleString('en-GB', { timeZone: DAYTZ }) + ' (UTC+7)';
+}
+refreshTimes();
+refreshUpdated();
+setInterval(() => { refreshTimes(); refreshUpdated(); }, 45000);
+applyFilter();
+applySort();
+console.log('%c⚡ AI Pulse', 'color:#00D2FF;font-weight:700',
+  'generated', P.generated ? new Date(P.generated * 1000).toISOString() : '?', '| built by DeepHermes');
+})();
+</script>
+</body>
+</html>
