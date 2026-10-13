@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""AI Pulse — zero-cost, self-updating AI news site.
+"""Dev Pulse — zero-cost, self-updating dev news site (game/app/art/web).
 
 Fetches ~45 keyless sources (lab blogs, AI press, newsletters, Hacker News,
 Hugging Face Daily Papers, arXiv, Google News), cleans + dedupes + categorizes,
@@ -1231,7 +1231,7 @@ def build():
         '<link rel="manifest" href="manifest.webmanifest">'
         '<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">'
         '<link rel="mask-icon" href="assets/mask-icon.svg" color="#6C5CE7">'
-        '<meta name="apple-mobile-web-app-title" content="AI Pulse">'
+        '<meta name="apple-mobile-web-app-title" content="Dev Pulse">'
         '<meta name="apple-mobile-web-app-capable" content="yes">'
         '<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">'
         '<meta name="mobile-web-app-capable" content="yes">'
