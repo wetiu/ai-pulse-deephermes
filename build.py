@@ -1031,13 +1031,15 @@ def fetch_all(sources: list[dict]) -> tuple[list[dict], list[dict]]:
 
 
 def item_allowed(a: dict) -> bool:
-    """Noise gate re-applied to merged history, so stale junk gets purged —
-    not just kept out at fetch time (feed rules can tighten between builds)."""
+    """Noise + dev-vertical gate re-applied to merged history, so stale junk
+    (including articles from sources no longer in sources.json) gets purged.
+    Strict gate: every article in the history must match one of the 4 verticals.
+    """
     sid = a.get("source_id") or ""
     if sid.startswith("gnews") and GNEWS_NOISE_RE.search(a["title"]):
         return False
-    req = REQUIRE_BY_ID.get(sid)
-    if req and not REQUIRE_RES[req].search(a["title"] + " " + (a.get("snippet") or "")):
+    # Strict dev-vertical gate: title+snippet must hit GAME_RE|APP_RE|ART_RE|WEB_RE
+    if not DEV_RE.search(a["title"] + " " + (a.get("snippet") or "")):
         return False
     return True
 
@@ -1072,6 +1074,10 @@ def merge_history(fetched: list[dict]) -> tuple[list[dict], int]:
     for a in existing.values():
         if a.get("source_id") == "ghtrend":
             a["snippet"] = tidy_github_snippet(a.get("snippet") or "")
+    # Re-categorize every surviving article against the current 4-vertical regex.
+    # (Old history may carry stale category names like "industry"/"models".)
+    for a in existing.values():
+        a["cat"] = categorize(a)
     articles = [a for a in existing.values() if item_allowed(a)]
     articles.sort(key=lambda x: x["ts"], reverse=True)
     # prune
