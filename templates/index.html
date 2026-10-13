@@ -45,6 +45,13 @@ a{color:inherit;text-decoration:none}
   mask-image:radial-gradient(ellipse 90% 70% at 50% 0%,#000 40%,transparent 100%)}
 .wrap{position:relative;z-index:1;max-width:1240px;margin:0 auto;padding:0 22px}
 
+/* scroll progress (thin neon) */
+.scrollprog{position:fixed;top:0;left:0;right:0;height:3px;z-index:80;pointer-events:none;
+  background:transparent}
+.scrollprog i{display:block;height:100%;width:0%;
+  background:linear-gradient(90deg,var(--neon) 0%,var(--accent) 50%,var(--pink) 100%);
+  box-shadow:0 0 12px rgba(0,210,255,.55);transition:width .12s linear}
+
 /* topbar */
 .topbar{position:sticky;top:0;z-index:60;display:flex;align-items:center;gap:16px;
   padding:10px 22px;background:rgba(5,5,8,.78);backdrop-filter:blur(18px) saturate(1.4);
@@ -68,7 +75,9 @@ a{color:inherit;text-decoration:none}
 .ghost.on{color:#050508;background:var(--neon);border-color:var(--neon);font-weight:600}
 .status{display:flex;align-items:center;gap:7px;font-family:var(--f-mono);font-size:11px;
   color:var(--muted);white-space:nowrap}
-.status .dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green)}
+.status .dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);transition:background .4s,box-shadow .4s}
+.status .dot.amber{background:#FFB454;box-shadow:0 0 8px rgba(255,180,84,.6)}
+.status .dot.red{background:#FF4D6D;box-shadow:0 0 8px rgba(255,77,109,.6)}
 .topnav{display:flex;gap:14px;font-family:var(--f-mono);font-size:11.5px;color:var(--muted)}
 .topnav a:hover{color:var(--neon)}
 
@@ -154,8 +163,14 @@ a{color:inherit;text-decoration:none}
 .dayhead em{margin-left:auto;font-style:normal;font-family:var(--f-mono);font-size:10.5px;
   color:var(--dim);background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:2px 10px}
 .card{position:relative;display:flex;gap:16px;align-items:flex-start;padding:15px 14px 15px 20px;
-  border-bottom:1px solid rgba(255,255,255,.045);transition:background .16s}
-.card:hover{background:rgba(255,255,255,.018)}
+  border-bottom:1px solid rgba(255,255,255,.045);transition:background .16s,transform .18s,box-shadow .22s,border-color .22s;border-radius:10px;
+  border:1px solid transparent;border-bottom:1px solid rgba(255,255,255,.045)}
+.card:hover{background:rgba(255,255,255,.025);transform:translateY(-1px);
+  box-shadow:0 14px 36px -22px rgba(108,92,231,.55),0 0 0 1px rgba(108,92,231,.18) inset}
+.card.kbfocus{outline:none;border-color:rgba(0,210,255,.55);
+  box-shadow:0 0 0 1px rgba(0,210,255,.45),0 12px 32px -18px rgba(0,210,255,.45)}
+.card.firstglow{animation:firstglow 2.4s ease-in-out 1.4s 1}
+@keyframes firstglow{0%,100%{box-shadow:none}50%{box-shadow:0 0 32px -4px rgba(0,210,255,.4),0 0 0 1px rgba(0,210,255,.15) inset}}
 .c-accent{position:absolute;left:0;top:14px;bottom:14px;width:3px;border-radius:3px;opacity:.85}
 .c-main{flex:1;min-width:0}
 .c-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
@@ -165,8 +180,8 @@ a{color:inherit;text-decoration:none}
 .c-dot{color:var(--dim)}
 .c-top time{font-family:var(--f-mono);font-size:11px;color:var(--dim)}
 .pts{font-family:var(--f-mono);font-size:11px;color:#FFB454}
-.newpill{background:var(--pink);color:#050508;font-family:var(--f-mono);font-size:9.5px;font-weight:700;
-  letter-spacing:.08em;border-radius:999px;padding:2px 8px;animation:pulse 2.4s ease-in-out infinite}
+.newpill{background:linear-gradient(90deg,var(--neon),var(--accent));color:#050508;font-family:var(--f-mono);font-size:9.5px;font-weight:700;
+  letter-spacing:.08em;border-radius:999px;padding:2px 8px;animation:pulse 2.4s ease-in-out infinite;box-shadow:0 0 14px rgba(0,210,255,.45)}
 .card h3{margin:5px 0 3px;font-size:15.5px;font-weight:600;line-height:1.45}
 .card h3 a{color:#EDEDF7;background-image:linear-gradient(90deg,var(--neon),var(--accent));
   background-repeat:no-repeat;background-size:0% 1.5px;background-position:0 100%;transition:background-size .25s}
@@ -177,7 +192,8 @@ a{color:inherit;text-decoration:none}
 .catpill{font-family:var(--f-mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;
   border:1px solid;border-radius:999px;padding:1.5px 9px}
 .thumb{width:90px;height:90px;object-fit:cover;border-radius:11px;opacity:.92;flex:none;align-self:center;
-  border:1px solid rgba(255,255,255,.09);filter:brightness(.9) saturate(1.04)}
+  border:1px solid rgba(255,255,255,.09);filter:brightness(.9) saturate(1.04);cursor:zoom-in;transition:transform .2s,box-shadow .2s}
+.thumb:hover{transform:scale(1.06);box-shadow:0 8px 24px -8px rgba(0,210,255,.5)}
 @media(max-width:600px){.thumb{display:none}}
 .morewrap{margin:26px 0 10px}
 .more{width:100%;background:var(--surface);border:1px dashed var(--border2);color:var(--muted);
@@ -221,6 +237,57 @@ a{color:inherit;text-decoration:none}
 .about a{color:var(--neon)}
 .about a:hover{text-decoration:underline}
 
+/* "Today" day-label pulse + dayhead */
+.dayhead .today-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);
+  box-shadow:0 0 8px var(--green);margin-left:8px;animation:pulse 1.8s ease-in-out infinite;vertical-align:middle}
+
+/* source health summary */
+.srchealth-summary{margin:0 0 9px;padding:6px 9px;font-family:var(--f-mono);font-size:10.5px;color:var(--muted);
+  border-radius:8px;background:var(--surface);border:1px solid var(--border)}
+.srchealth-summary b{color:var(--green)}
+.srchealth-summary.fail b{color:#FF4D6D}
+
+/* back-to-top */
+.totop{position:fixed;right:22px;bottom:22px;z-index:55;width:42px;height:42px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;background:rgba(10,10,18,.92);border:1px solid var(--border2);
+  color:var(--muted);font-family:var(--f-mono);font-size:14px;cursor:pointer;opacity:0;transform:translateY(8px) scale(.85);
+  pointer-events:none;transition:opacity .25s,transform .25s,color .15s,border-color .15s,box-shadow .25s;
+  box-shadow:0 14px 32px -16px rgba(0,0,0,.7)}
+.totop.show{opacity:1;transform:none;pointer-events:auto}
+.totop:hover{color:var(--neon);border-color:rgba(0,210,255,.45);box-shadow:0 14px 32px -10px rgba(0,210,255,.45)}
+
+/* command palette / help modal */
+.cmdmodal{position:fixed;inset:0;z-index:100;display:none;align-items:flex-start;justify-content:center;
+  background:rgba(5,5,8,.72);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:14vh 16px 0}
+.cmdmodal.open{display:flex;animation:fadeup .18s ease both}
+.cmdbox{width:100%;max-width:580px;background:linear-gradient(180deg,rgba(14,14,22,.98),rgba(8,8,14,.98));
+  border:1px solid var(--border2);border-radius:18px;box-shadow:0 32px 80px -20px rgba(0,0,0,.85),0 0 0 1px rgba(108,92,231,.1) inset;
+  overflow:hidden}
+.cmdinput{width:100%;background:transparent;border:0;border-bottom:1px solid var(--border);
+  padding:17px 19px;color:var(--text);font-family:var(--f-body);font-size:15px;outline:none}
+.cmdinput::placeholder{color:var(--dim)}
+.cmdhint{padding:8px 19px;font-family:var(--f-mono);font-size:10.5px;color:var(--dim);
+  border-bottom:1px solid var(--border);display:flex;gap:14px;flex-wrap:wrap}
+.cmdhint b{color:var(--muted);font-weight:500}
+.cmdlist{max-height:48vh;overflow:auto;padding:6px}
+.cmditem{display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:10px;cursor:pointer;color:var(--muted)}
+.cmditem.active,.cmditem:hover{background:rgba(108,92,231,.1);color:var(--text)}
+.cmditem .kbd{margin-left:auto;font-family:var(--f-mono);font-size:10px;color:var(--dim);
+  border:1px solid var(--border);border-radius:6px;padding:1.5px 6px}
+.cmditem .ic{width:18px;display:inline-flex;justify-content:center;color:var(--neon)}
+.cmdempty{padding:24px;text-align:center;color:var(--dim);font-size:12.5px}
+.kbdkey{display:inline-block;min-width:18px;text-align:center;font-family:var(--f-mono);font-size:10px;
+  color:var(--muted);border:1px solid var(--border);border-bottom-width:2px;border-radius:5px;padding:1px 6px;
+  background:rgba(255,255,255,.02)}
+
+/* image lightbox */
+.lightbox{position:fixed;inset:0;z-index:110;display:none;align-items:center;justify-content:center;
+  background:rgba(2,2,6,.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:24px;cursor:zoom-out}
+.lightbox.open{display:flex;animation:fadeup .2s ease both}
+.lightbox img{max-width:96vw;max-height:92vh;border-radius:14px;box-shadow:0 30px 90px -20px rgba(0,210,255,.45);
+  border:1px solid var(--border2)}
+.lightbox .cap{margin-top:14px;color:var(--muted);font-size:12.5px;font-family:var(--f-mono);text-align:center}
+
 /* footer */
 .foot{margin:56px 0 34px;text-align:center}
 .accent-line{height:1px;margin-bottom:22px;background:linear-gradient(90deg,transparent,rgba(0,210,255,.5),rgba(108,92,231,.5),rgba(255,107,157,.4),transparent)}
@@ -230,6 +297,8 @@ a{color:inherit;text-decoration:none}
   .topbar{flex-wrap:wrap;gap:10px}
   .searchwrap{order:3;max-width:none;width:100%}
   .dayhead{top:0}
+  .totop{right:14px;bottom:14px}
+  .cmdmodal{padding:8vh 12px 0}
 }
 @media(prefers-reduced-motion:reduce){
   *{animation:none!important;transition:none!important}
@@ -239,6 +308,14 @@ a{color:inherit;text-decoration:none}
 <body data-generated="%%GENERATED_ISO%%">
 <div class="bg-mesh"></div>
 <div class="bg-grid"></div>
+<div class="scrollprog" aria-hidden="true"><i id="scrollbar"></i></div>
+
+<noscript>
+<div style="position:sticky;top:0;z-index:200;background:linear-gradient(90deg,rgba(0,210,255,.16),rgba(108,92,231,.16));border-bottom:1px solid var(--border2);
+  text-align:center;padding:10px 18px;font-size:13px;color:var(--text);font-family:var(--f-body)">
+  AI Pulse works best with JavaScript — but the article list and search still work above. <a href="articles.json" style="color:var(--neon);text-decoration:underline">Open the full archive</a>.
+</div>
+</noscript>
 
 <header class="topbar">
   <a class="logo" href="./"><span class="pdot"></span><span class="gl">AI&nbsp;PULSE</span></a>
@@ -246,8 +323,8 @@ a{color:inherit;text-decoration:none}
     <input id="q" type="search" placeholder="Search every story…   press /" autocomplete="off" spellcheck="false">
     <button id="allbtn" class="ghost" title="Also search the full archive (articles.json)">archive</button>
   </div>
-  <div class="status"><span class="dot"></span><span id="updated">updated…</span></div>
-  <nav class="topnav"><a href="%%REPO_URL%%" target="_blank" rel="noopener">repo</a><a href="feed.xml">rss</a></nav>
+  <div class="status"><span class="dot" id="statusdot"></span><span id="updated">updated…</span></div>
+  <nav class="topnav"><button id="helpbtn" class="ghost" style="background:transparent" title="Keyboard shortcuts (?)">?</button><a href="%%REPO_URL%%" target="_blank" rel="noopener">repo</a><a href="feed.xml">rss</a></nav>
 </header>
 
 <main class="wrap">
@@ -293,7 +370,7 @@ a{color:inherit;text-decoration:none}
     <aside class="rail">
       <section class="railcard"><h3>🔥 Trending <em>last 48h</em></h3><ol class="trending">%%TRENDING_HTML%%</ol></section>
       <section class="railcard"><h3>📊 Categories <em>7 days</em></h3><ul class="catbars">%%CATBARS_HTML%%</ul></section>
-      <section class="railcard"><h3>📡 Source health</h3><ul class="srchealth">%%SOURCES_HTML%%</ul></section>
+      <section class="railcard"><h3>📡 Source health</h3><p class="srchealth-summary" id="srchealthsum"></p><ul class="srchealth">%%SOURCES_HTML%%</ul></section>
       <section class="railcard about"><h3>ℹ About</h3>
         <p>Built by <b>DeepHermes</b> for Metin. Regenerated in GitHub's cloud every 4 hours —
           independent of any home machine, free forever.</p>
@@ -308,6 +385,20 @@ a{color:inherit;text-decoration:none}
     <p class="dim">Independent aggregator — every story links to its original publisher.</p>
   </footer>
 </main>
+
+<button class="totop" id="totop" title="Back to top (Home)" aria-label="Back to top">↑</button>
+
+<div class="cmdmodal" id="cmdmodal" role="dialog" aria-modal="true" aria-label="Command palette">
+  <div class="cmdbox" id="cmdbox">
+    <input id="cmdinput" class="cmdinput" type="search" placeholder="Search stories, jump to category, run command…" autocomplete="off" spellcheck="false">
+    <div class="cmdhint" id="cmdhint">
+      <span><b>↑↓</b> navigate</span><span><b>⏎</b> open</span><span><b>esc</b> close</span><span><b>/</b> search-only mode</span>
+    </div>
+    <div class="cmdlist" id="cmdlist"></div>
+  </div>
+</div>
+
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Image preview"><div style="text-align:center"><img id="lightimg" alt=""><div class="cap" id="lightcap"></div></div></div>
 
 <script>window.__PULSE__ = %%PULSE_JSON%%;</script>
 <script>
@@ -608,13 +699,197 @@ function refreshUpdated() {
   } catch (e) {}
 })();
 
+/* ---------- scroll progress ---------- */
+const scrollBar = $('#scrollbar');
+function onScroll() {
+  const max = document.documentElement.scrollHeight - window.innerHeight;
+  const pct = max > 0 ? Math.min(100, (window.scrollY / max) * 100) : 0;
+  if (scrollBar) scrollBar.style.width = pct + '%';
+  if (toTop) toTop.classList.toggle('show', window.scrollY > 400);
+}
+window.addEventListener('scroll', onScroll, { passive: true });
+onScroll();
+
+/* ---------- back-to-top ---------- */
+const toTop = $('#totop');
+if (toTop) toTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+/* ---------- "Today" day-label pulse dot ---------- */
+$$('#feed .day').forEach(sec => {
+  const head = sec.querySelector('.dayhead');
+  if (!head) return;
+  const span = head.querySelector('span');
+  if (span && /today/i.test(span.textContent) && !head.querySelector('.today-dot')) {
+    const d = document.createElement('i'); d.className = 'today-dot';
+    span.appendChild(d);
+  }
+});
+
+/* ---------- first-visible-card breathing glow ---------- */
+const firstVisible = $$('#feed .card:not([hidden])')[0];
+if (firstVisible) firstVisible.classList.add('firstglow');
+
+/* ---------- topbar freshness dot color (green/amber/red by build age) ---------- */
+const statusDot = $('#statusdot');
+function refreshStatusDot() {
+  if (!statusDot || !P.generated) return;
+  const ageS = Math.floor(Date.now() / 1000) - P.generated;
+  statusDot.classList.remove('amber', 'red');
+  if (ageS > 86400) statusDot.classList.add('red');
+  else if (ageS > 21600) statusDot.classList.add('amber');
+}
+refreshStatusDot();
+
+/* ---------- source health summary line ---------- */
+(function () {
+  const sum = $('#srchealthsum');
+  if (!sum) return;
+  const rows = $$('.srchealth .srow');
+  const ok = rows.filter(r => r.querySelector('.dot.ok')).length;
+  const total = rows.length;
+  if (!total) { sum.remove(); return; }
+  const fail = total - ok;
+  sum.innerHTML = fail
+    ? `<b>${ok}/${total}</b> live · <span style="color:#FF4D6D">${fail} down</span>`
+    : `<b>${ok}/${total}</b> live · all systems green`;
+  sum.classList.toggle('fail', fail > 0);
+})();
+
+/* ---------- command palette (Cmd/Ctrl-K) ---------- */
+const cmdModal = $('#cmdmodal'), cmdInput = $('#cmdinput'), cmdList = $('#cmdlist');
+const CMD_CATS = [{ k: 'all', label: 'All stories', count: null },
+  { k: 'models', label: 'Models & Releases' }, { k: 'research', label: 'Research' },
+  { k: 'policy', label: 'Policy & Safety' }, { k: 'business', label: 'Business' },
+  { k: 'tools', label: 'Tools & Products' }, { k: 'opensource', label: 'Open Source' },
+  { k: 'industry', label: 'Industry' }];
+const CMD_CMDS = [
+  { ic: '⟳', label: 'Reload all data', kbd: 'R', run: () => location.reload() },
+  { ic: '↑', label: 'Back to top', kbd: 'Home', run: () => window.scrollTo({ top: 0, behavior: 'smooth' }) },
+  { ic: '↓', label: 'Jump to bottom', kbd: 'End', run: () => window.scrollTo({ top: 1e9, behavior: 'smooth' }) },
+  { ic: '↕', label: 'Sort: newest first', run: () => { sortEl.value = 'newest'; sortEl.dispatchEvent(new Event('change')); } },
+  { ic: '🔥', label: 'Sort: trending first', run: () => { sortEl.value = 'hot'; sortEl.dispatchEvent(new Event('change')); } },
+  { ic: '📥', label: 'Open RSS feed', run: () => window.open('feed.xml', '_blank') },
+  { ic: '📦', label: 'Open raw archive (articles.json)', run: () => window.open('articles.json', '_blank') },
+  { ic: '🌐', label: 'Open public site on GitHub Pages', run: () => window.open(location.href, '_blank') },
+  { ic: '? ', label: 'Show keyboard shortcuts', kbd: '?', run: openHelp },
+];
+const sortEl = $('#sort');
+let cmdResults = [], cmdSel = 0;
+
+function runPill(cat) { state.cat = cat; $$('#pills .pill').forEach(x => x.classList.toggle('active', x.dataset.cat === cat)); applyFilter(); }
+function openHelp() {
+  cmdResults = [{ ic: '✦', label: 'Press any key — here are your shortcuts:', kbd: '' }].concat(
+    [{ kbd: '/', label: 'Focus search' }, { kbd: 'Esc', label: 'Clear search' },
+     { kbd: 'j / ↓', label: 'Next card' }, { kbd: 'k / ↑', label: 'Previous card' },
+     { kbd: 'Enter', label: 'Open focused card' }, { kbd: 'g t', label: 'Jump to top' },
+     { kbd: 'Cmd/Ctrl-K', label: 'Open this palette' }, { kbd: '?', label: 'Show shortcuts' }].map(x => ({ ic: '⌨', label: x.label, kbd: x.kbd })));
+  renderCmd();
+  cmdModal.classList.add('open');
+  setTimeout(() => cmdInput.focus(), 10);
+}
+function renderCmd() {
+  if (!cmdResults.length) { cmdList.innerHTML = '<div class="cmdempty">no matches</div>'; return; }
+  cmdList.innerHTML = cmdResults.map((r, i) =>
+    `<div class="cmditem${i === cmdSel ? ' active' : ''}" data-i="${i}">
+      <span class="ic">${esc(r.ic || '·')}</span>
+      <span>${esc(r.label)}</span>${r.kbd ? `<span class="kbd">${esc(r.kbd)}</span>` : ''}
+    </div>`).join('');
+  cmdList.querySelectorAll('.cmditem').forEach(el => el.addEventListener('click', () => {
+    cmdSel = +el.dataset.i; cmdList.querySelectorAll('.cmditem').forEach((x, j) => x.classList.toggle('active', j === cmdSel));
+    execCmd();
+  }));
+}
+function execCmd() { const r = cmdResults[cmdSel]; if (r) { r.run ? r.run() : (window.location.href = r.url || '#'); cmdModal.classList.remove('open'); } }
+function openCmd() {
+  const q = (cmdInput.value || '').trim();
+  const base = CMD_CATS.map(c => ({ ic: c.k === 'all' ? '✺' : '◇', label: 'Category · ' + c.label, run: () => runPill(c.k) }))
+    .concat(CMD_CMDS);
+  const matches = q ? base.filter(r => r.label.toLowerCase().includes(q.toLowerCase())) : base;
+  const storyHits = q.length >= 2 ? $$('#feed .card:not([hidden])').slice(0, 30).filter(c =>
+    (c.dataset.ltext || c.dataset.text || '').includes(q.toLowerCase())
+  ).map(c => ({ ic: '🔗', label: (c.querySelector('h3 a') || {}).textContent || '?', url: (c.querySelector('h3 a') || {}).href })) : [];
+  cmdResults = storyHits.concat(matches);
+  cmdSel = 0;
+  renderCmd();
+  cmdModal.classList.add('open');
+  setTimeout(() => cmdInput.focus(), 10);
+}
+if (cmdInput) {
+  cmdInput.addEventListener('input', openCmd);
+  cmdInput.addEventListener('keydown', e => {
+    if (e.key === 'ArrowDown') { e.preventDefault(); cmdSel = Math.min(cmdResults.length - 1, cmdSel + 1); renderCmd(); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); cmdSel = Math.max(0, cmdSel - 1); renderCmd(); }
+    else if (e.key === 'Enter') { e.preventDefault(); execCmd(); }
+    else if (e.key === 'Escape') { e.preventDefault(); cmdModal.classList.remove('open'); }
+  });
+}
+if (cmdModal) cmdModal.addEventListener('click', e => { if (e.target === cmdModal) cmdModal.classList.remove('open'); });
+
+/* ---------- keyboard nav: j/k/Enter + Cmd-K + ? + g+t + Home/End ---------- */
+let kbIndex = -1;
+function kbFocusCard(idx) {
+  const cards = $$('#feed .card:not([hidden])');
+  if (!cards.length) return;
+  kbIndex = Math.max(0, Math.min(cards.length - 1, idx));
+  cards.forEach((c, i) => c.classList.toggle('kbfocus', i === kbIndex));
+  cards[kbIndex].scrollIntoView({ block: 'center', behavior: 'smooth' });
+}
+const helpBtn = $('#helpbtn');
+if (helpBtn) helpBtn.addEventListener('click', openHelp);
+
+let gPrefix = false;
+document.addEventListener('keydown', e => {
+  const tag = (document.activeElement && document.activeElement.tagName) || '';
+  const inField = /INPUT|TEXTAREA|SELECT/.test(tag);
+  // cmd/ctrl-K opens palette (works even from fields)
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); openCmd(); return; }
+  if (inField) return;
+  if (cmdModal.classList.contains('open')) return;
+  if (e.key === '?' || (e.shiftKey && e.key === '/')) { e.preventDefault(); openHelp(); return; }
+  if (e.key === 'Home') { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+  if (e.key === 'End') { e.preventDefault(); window.scrollTo({ top: 1e9, behavior: 'smooth' }); return; }
+  if (e.key === 'g' && !gPrefix) { gPrefix = true; setTimeout(() => gPrefix = false, 1100); return; }
+  if (gPrefix && e.key === 't') { e.preventDefault(); gPrefix = false; window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+  if (e.key === 'j' || e.key === 'ArrowDown') { e.preventDefault(); kbFocusCard((kbIndex < 0 ? -1 : kbIndex) + 1); }
+  else if (e.key === 'k' || e.key === 'ArrowUp') { e.preventDefault(); kbFocusCard((kbIndex < 0 ? $$('#feed .card:not([hidden])').length : kbIndex) - 1); }
+  else if (e.key === 'Enter' && kbIndex >= 0) {
+    e.preventDefault();
+    const c = $$('#feed .card:not([hidden])')[kbIndex];
+    const a = c && c.querySelector('h3 a');
+    if (a) window.open(a.href, '_blank', 'noopener');
+  }
+});
+
+/* ---------- image lightbox (click thumb) ---------- */
+const lightbox = $('#lightbox'), lightImg = $('#lightimg'), lightCap = $('#lightcap');
+document.addEventListener('click', e => {
+  const t = e.target.closest('.thumb');
+  if (!t) return;
+  e.preventDefault(); e.stopPropagation();
+  lightImg.src = t.src; lightImg.alt = t.alt || '';
+  const card = t.closest('.card');
+  const title = card ? (card.querySelector('h3 a') || {}).textContent : '';
+  const src = card ? (card.querySelector('.src') || {}).textContent : '';
+  lightCap.textContent = (title ? title + ' · ' : '') + (src || '');
+  lightbox.classList.add('open');
+});
+if (lightbox) lightbox.addEventListener('click', () => lightbox.classList.remove('open'));
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && lightbox.classList.contains('open')) lightbox.classList.remove('open'); });
+
+/* ---------- digest hover glow ---------- */
+const digestEl = document.querySelector('.digest');
+if (digestEl) {
+  digestEl.addEventListener('mouseenter', () => digestEl.style.boxShadow = '0 18px 60px -16px rgba(0,210,255,.55), 0 0 0 1px rgba(0,210,255,.18) inset');
+  digestEl.addEventListener('mouseleave', () => digestEl.style.boxShadow = '');
+}
+
 /* ---------- boot ---------- */
 if (genEl && P.generated) {
   genEl.textContent = 'last build ' + new Date(P.generated * 1000).toLocaleString('en-GB', { timeZone: DAYTZ }) + ' (UTC+7)';
 }
 refreshTimes();
 refreshUpdated();
-setInterval(() => { refreshTimes(); refreshUpdated(); }, 45000);
+setInterval(() => { refreshTimes(); refreshUpdated(); refreshStatusDot(); }, 45000);
 applyFilter();
 applySort();
 console.log('%c⚡ AI Pulse', 'color:#00D2FF;font-weight:700',

@@ -889,6 +889,25 @@ def build():
         print(f"  WARNING: unreplaced template tokens: {leftover}")
     (SITE / "index.html").write_text(page, encoding="utf-8")
 
+    # extra head tags for PWA + iOS + OG
+    head_extras = (
+        '<link rel="manifest" href="manifest.webmanifest">'
+        '<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">'
+        '<link rel="mask-icon" href="assets/mask-icon.svg" color="#6C5CE7">'
+        '<meta name="apple-mobile-web-app-title" content="AI Pulse">'
+        '<meta name="apple-mobile-web-app-capable" content="yes">'
+        '<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">'
+        '<meta name="mobile-web-app-capable" content="yes">'
+        '<meta name="theme-color" content="#050508">'
+        '<meta property="og:image" content="assets/og-image.png">'
+        '<meta name="twitter:card" content="summary_large_image">'
+        '<meta name="twitter:image" content="assets/og-image.png">'
+        '<meta name="twitter:title" content="AI Pulse — every AI signal, one page">'
+        '<meta name="twitter:description" content="Auto-curated AI news from 47 sources, refreshed every 4 hours. $0 forever.">'
+    )
+    page = page.replace("<link rel=\"alternate\"", head_extras + "<link rel=\"alternate\"", 1)
+    (SITE / "index.html").write_text(page, encoding="utf-8")
+
     # articles.json (full history, for "load older" + search-all)
     slim = [{k: a.get(k) for k in
              ("id", "title", "url", "snippet", "image", "source", "source_id",
@@ -928,6 +947,133 @@ def build():
             + "".join(rss_items) + "</channel></rss>")
     (SITE / "feed.xml").write_text(feed, encoding="utf-8")
     (SITE / "robots.txt").write_text("User-agent: *\nAllow: /\n")
+
+    # ---------- PWA artifacts ----------
+    (SITE / "manifest.webmanifest").write_text(json.dumps({
+        "name": "AI Pulse — every AI signal, one page",
+        "short_name": "AI Pulse",
+        "description": "Auto-curated AI news from 47 sources, refreshed every 4 hours. $0 forever.",
+        "start_url": "./",
+        "scope": "./",
+        "display": "standalone",
+        "background_color": "#050508",
+        "theme_color": "#050508",
+        "orientation": "portrait-primary",
+        "icons": [
+            {"src": "assets/apple-touch-icon.png", "sizes": "180x180", "type": "image/png", "purpose": "any maskable"},
+            {"src": "favicon-32.png", "sizes": "32x32", "type": "image/png"},
+            {"src": "favicon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+        ],
+    }, separators=(",", ":")), encoding="utf-8")
+
+    # service worker (cache-shell, network-first for articles.json, swr for feed.xml)
+    (SITE / "sw.js").write_text((
+        "const CACHE = 'ai-pulse-v2';\n"
+        "const PRECACHE = ['./', 'index.html', 'articles.json', 'feed.xml', 'manifest.webmanifest', "
+        "'assets/apple-touch-icon.png', 'assets/og-image.png', 'favicon-32.png', 'favicon-192.png'];\n"
+        "self.addEventListener('install', e => { self.skipWaiting(); "
+        "e.waitUntil(caches.open(CACHE).then(c => c.addAll(PRECACHE).catch(() => {}))); });\n"
+        "self.addEventListener('activate', e => { e.waitUntil("
+        "caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))); "
+        "self.clients.claim(); });\n"
+        "self.addEventListener('fetch', e => {\n"
+        "  const u = new URL(e.request.url);\n"
+        "  if (u.origin !== location.origin) return;\n"
+        "  if (e.request.method !== 'GET') return;\n"
+        "  if (u.pathname.endsWith('/articles.json')) {\n"
+        "    e.respondWith(fetch(e.request).then(r => { const c = r.clone(); "
+        "caches.open(CACHE).then(x => x.put(e.request, c)); return r; }).catch(() => caches.match(e.request)));\n"
+        "    return;\n"
+        "  }\n"
+        "  if (u.pathname.endsWith('/feed.xml')) {\n"
+        "    e.respondWith(caches.open(CACHE).then(c => c.match(e.request)).then(cached => "
+        "Promise.race([fetch(e.request).then(r => { c && c.put(e.request, r.clone()); return r; }), "
+        "new Promise(res => setTimeout(() => res(cached || new Response('', {status:504})), 1500))]).catch(() => cached)));\n"
+        "    return;\n"
+        "  }\n"
+        "  if (e.request.mode === 'navigate') {\n"
+        "    e.respondWith(fetch(e.request).then(r => { const c = r.clone(); "
+        "caches.open(CACHE).then(x => x.put('./index.html', c)); return r; }).catch(() => caches.match('./index.html')));\n"
+        "    return;\n"
+        "  }\n"
+        "  e.respondWith(caches.match(e.request).then(c => c || fetch(e.request).then(r => "
+        "{ if (r.status === 200) { const cc = r.clone(); caches.open(CACHE).then(x => x.put(e.request, cc)); } return r; })));\n"
+        "});\n"
+    ), encoding="utf-8")
+
+    # register the SW in index.html
+    idx = (SITE / "index.html").read_text(encoding="utf-8")
+    if "navigator.serviceWorker" not in idx:
+        idx = idx.replace("</body>",
+            "<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js');}</script></body>", 1)
+        (SITE / "index.html").write_text(idx, encoding="utf-8")
+
+    # ---------- icons (Pillow generates them; skipped if Pillow missing) ----------
+    try:
+        from PIL import Image, ImageDraw, ImageFont  # type: ignore
+        assets = SITE / "assets"
+        assets.mkdir(exist_ok=True)
+
+        def _font(sz):
+            for p in ("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+                      "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+                      "/usr/share/fonts/TTF/DejaVuSans-Bold.ttf"):
+                if Path(p).exists():
+                    try: return ImageFont.truetype(p, sz)
+                    except Exception: pass
+            return ImageFont.load_default()
+
+        # 32 / 192 (PWA + favicon)
+        for size, name in ((32, "favicon-32.png"), (192, "favicon-192.png"),
+                            (180, "apple-touch-icon.png"), (1200, "og-image.png")):
+            img = Image.new("RGB", (size, size), (5, 5, 8))
+            d = ImageDraw.Draw(img)
+            if size >= 192:
+                # gradient ring
+                for r in range(2, 6):
+                    col = (108 + r * 4, 92 + r * 4, 231 - r * 5) if r % 2 == 0 else (0, 210, 255)
+                    d.ellipse((r, r, size - r, size - r), outline=col, width=1)
+            # neon line + dot
+            scale = size / 32
+            d.line([(int(5 * scale), int(21 * scale)), (int(12 * scale), int(13 * scale)),
+                    (int(18 * scale), int(19 * scale)), (int(27 * scale), int(9 * scale))],
+                   fill=(0, 210, 255), width=max(2, int(3 * scale)))
+            d.ellipse((int(24 * scale), int(6 * scale), int(30 * scale), int(12 * scale)),
+                      fill=(255, 107, 157))
+            # mask-icon: simpler mono
+            if name != "mask-icon.svg":
+                img.save(assets / name if "apple" in name or "og" in name else SITE / name)
+
+        # OG card: 1200x630 cyberpunk with gradient + title
+        og = Image.new("RGB", (1200, 630), (5, 5, 8))
+        od = ImageDraw.Draw(og)
+        # background mesh
+        for i in range(6):
+            cx = 200 + i * 160
+            cy = 100 + (i % 2) * 200
+            for r in range(80, 0, -8):
+                a = max(0, 24 - r // 4)
+                col = (108, 92, 231) if i % 3 == 0 else (0, 210, 255) if i % 3 == 1 else (255, 107, 157)
+                od.ellipse((cx - r, cy - r, cx + r, cy + r), outline=col)
+        # title
+        f1 = _font(98); f2 = _font(40)
+        od.text((72, 200), "AI Pulse", fill=(240, 240, 250), font=f1)
+        od.text((72, 320), "Every AI signal. One page. Zero noise.", fill=(0, 210, 255), font=f2)
+        od.text((72, 400), f"47 sources · 1,160+ stories tracked · $0 forever", fill=(154, 154, 180), font=f2)
+        od.text((72, 540), "wetiu.github.io/ai-pulse-deephermes", fill=(108, 92, 231), font=f2)
+        og.save(assets / "og-image.png")
+
+        # mask-icon.svg (monochrome, theme-aware)
+        (SITE / "assets").mkdir(exist_ok=True)
+        (SITE / "assets" / "mask-icon.svg").write_text(
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">'
+            '<path d="M5 21 L12 13 L18 19 L27 9 M24 9 L27 9 L27 12" '
+            'fill="none" stroke="#000" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>'
+            '<circle cx="27" cy="9" r="3" fill="#000"/>'
+            '</svg>', encoding="utf-8")
+        print("  icons: generated (Pillow)")
+    except Exception as ex:
+        print(f"  icons: skipped ({ex})")
 
     # summary
     print("\nSOURCE HEALTH")
