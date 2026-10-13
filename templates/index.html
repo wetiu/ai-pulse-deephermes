@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AI Pulse — every AI signal, one page</title>
-<meta name="description" content="AI Pulse — auto-curated AI news from %%SOURCES_TOTAL%% sources, refreshed every 4 hours. Models, research, business, tools, policy. Always on, forever free.">
+<title>Dev Pulse — every dev signal, one page</title>
+<meta name="description" content="Dev Pulse — auto-curated dev news for game, app, art and web development, refreshed every 4 hours. Forever free.">
 <meta name="theme-color" content="#050508">
-<meta property="og:title" content="AI Pulse — every AI signal, one page">
-<meta property="og:description" content="Auto-curated AI news, refreshed every 4 hours from GitHub's cloud.">
+<meta property="og:title" content="Dev Pulse — every dev signal, one page">
+<meta property="og:description" content="Auto-curated dev news for game, app, art and web development, refreshed every 4 hours.">
 <meta property="og:type" content="website">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23050508'/><path d='M5 21 L12 13 L18 19 L27 9' stroke='%2300D2FF' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/><circle cx='27' cy='9' r='3' fill='%23FF6B9D'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -318,7 +318,7 @@ a{color:inherit;text-decoration:none}
 </noscript>
 
 <header class="topbar">
-  <a class="logo" href="./"><span class="pdot"></span><span class="gl">AI&nbsp;PULSE</span></a>
+  <a class="logo" href="./"><span class="pdot"></span><span class="gl">DEV&nbsp;PULSE</span></a>
   <div class="searchwrap">
     <input id="q" type="search" placeholder="Search every story…   press /" autocomplete="off" spellcheck="false">
     <button id="allbtn" class="ghost" title="Also search the full archive (articles.json)">archive</button>
@@ -329,9 +329,9 @@ a{color:inherit;text-decoration:none}
 
 <main class="wrap">
   <section class="hero">
-    <h1><span class="grad">Every AI signal.</span><br>One page. Zero noise.</h1>
-    <p class="tagline">Auto-curated from %%SOURCES_TOTAL%% sources — lab blogs, AI press, research, Hacker News,
-      arXiv and Daily Papers — rebuilt every 4 hours in GitHub's cloud. No servers, no accounts, no bills.</p>
+    <h1><span class="grad">Game. App. Art. Web.</span><br>One dev feed. Zero noise.</h1>
+    <p class="tagline">Auto-curated from %%SOURCES_TOTAL%% sources across game development, app development,
+      art development and website development — rebuilt every 4 hours in GitHub's cloud. No servers, no accounts, no bills.</p>
     <div class="chips">
       <span class="chip"><b>%%TOTAL_TODAY%%</b> stories today</span>
       <span class="chip"><b>%%TOTAL_ALL%%</b> tracked</span>
@@ -374,6 +374,7 @@ a{color:inherit;text-decoration:none}
       <section class="railcard about"><h3>ℹ About</h3>
         <p>Built by <b>DeepHermes</b> for Metin. Regenerated in GitHub's cloud every 4 hours —
           independent of any home machine, free forever.</p>
+        <p>Game dev · App dev · Art dev · Web dev — every story links to its original publisher.</p>
         <p><a href="feed.xml">RSS feed</a> · <a href="%%REPO_URL%%" target="_blank" rel="noopener">source code</a> · <a href="articles.json">raw data</a></p>
       </section>
     </aside>
@@ -381,8 +382,8 @@ a{color:inherit;text-decoration:none}
 
   <footer class="foot">
     <div class="accent-line"></div>
-    <p>AI PULSE — $0 forever · refreshed every 4h from GitHub's cloud · <span id="gen"></span></p>
-    <p class="dim">Independent aggregator — every story links to its original publisher.</p>
+    <p>DEV PULSE — $0 forever · refreshed every 4h from GitHub's cloud · <span id="gen"></span></p>
+    <p class="dim">Game dev · App dev · Art dev · Web dev — every story links to its original publisher.</p>
   </footer>
 </main>
 
@@ -892,7 +893,7 @@ refreshUpdated();
 setInterval(() => { refreshTimes(); refreshUpdated(); refreshStatusDot(); }, 45000);
 applyFilter();
 applySort();
-console.log('%c⚡ AI Pulse', 'color:#00D2FF;font-weight:700',
+console.log('%c⚡ Dev Pulse', 'color:#00D2FF;font-weight:700',
   'generated', P.generated ? new Date(P.generated * 1000).toISOString() : '?', '| built by DeepHermes');
 })();
 </script>

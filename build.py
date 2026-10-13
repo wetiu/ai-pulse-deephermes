@@ -50,7 +50,7 @@ TZ = timezone(timedelta(hours=7))            # Metin's timezone (UTC+7, no DST)
 UTC = timezone.utc
 NOW = datetime.now(UTC)
 
-UA = "Mozilla/5.0 (compatible; AIPulse/1.0; +https://github.com)"
+UA = "Mozilla/5.0 (compatible; DevPulse/1.0; +https://github.com)"
 REPO_URL = os.environ.get("REPO_URL", "https://github.com").rstrip("/")
 SITE_URL = os.environ.get("SITE_URL", REPO_URL).rstrip("/")
 
@@ -65,41 +65,365 @@ TRACKING_PARAMS = re.compile(
     r"^(utm_|ref$|ref_|fbclid|gclid|mc_cid|mc_eid|igshid|s=|t=|si=|$)", re.I)
 
 CATEGORIES = {
-    "models":     ("Models & Releases", "#6C5CE7"),
-    "research":   ("Research",          "#00D2FF"),
-    "business":   ("Business",          "#FF6B9D"),
-    "tools":      ("Tools & Products",  "#4ADE80"),
-    "policy":     ("Policy & Safety",   "#FFD93D"),
-    "opensource": ("Open Source",       "#FB923C"),
-    "industry":   ("Industry",          "#8B95A9"),
+    "game": ("Game Dev",   "#6C5CE7"),
+    "app":  ("App Dev",    "#00D2FF"),
+    "art":  ("Art Dev",    "#FF6B9D"),
+    "web":  ("Web Dev",    "#4ADE80"),
 }
-CAT_PRIORITY = ["models", "research", "policy", "business", "tools", "opensource", "industry"]
+CAT_PRIORITY = ["game", "app", "art", "web"]
 
-CAT_RULES = {
-    "models": [r"\breleases?\b", r"\blaunch(es|ed|ing)?\b", r"\bunveil", r"\bannounc\w* (new|model)",
-               r"\bgpt-?\d", r"\bclaude\b", r"\bgemini\b", r"\bllama\b", r"\bmistral\b", r"\bqwen\b",
-               r"\bdeepseek\b", r"\bgrok\b", r"\bopen.?weights\b", r"\bfoundation model", r"\bfrontier model",
-               r"\breasoning model", r"\bmultimodal\b", r"\bstate.of.the.art model", r"\bmodel (family|card|weights)\b",
-               r"\bnew model\b", r"\bnext.gen\w* model"],
-    "research": [r"\bpaper\b", r"\barxiv\b", r"\bresearch", r"\bstud(y|ies)\b", r"\bbenchmark", r"\bstate.of.the.art\b",
-                 r"\bsota\b", r"\btraining (method|technique|run)", r"\bdataset\b", r"\bneurips\b", r"\bicml\b",
-                 r"\biclr\b", r"\bscaling law", r"\bfine.tun", r"\brlhf\b", r"\brlvr\b", r"\binterpretab",
-                 r"\bmechanistic", r"\bpretraining\b", r"\bbreakthrough"],
-    "business": [r"\bfunding\b", r"\braises?\b", r"\braised\b", r"\bvaluation\b", r"\bacquisiti", r"\bacquires?\b",
-                 r"\bipo\b", r"\brevenue\b", r"\bpartnership\b", r"\binvest", r"\bbillion\b", r"\bmillion\b",
-                 r"\bstartup", r"\blayoff", r"\bhire[sd]?\b", r"\bprofit", r"\bdeal\b", r"\bmarket"],
-    "tools": [r"\bapi\b", r"\bsdk\b", r"\bframework\b", r"\bplugin", r"\bextension\b", r"\bintegrat",
-              r"\bcopilot\b", r"\bcodex\b", r"\bcursor\b", r"\bwindsurf\b", r"\bmcp\b", r"\bapp\b",
-              r"\bavailable (now|today)\b", r"\bnow available\b", r"\btool(s)?\b", r"\bfeature",
-              r"\bagent(s)? (can|that|which)\b", r"\bworkflow"],
-    "policy": [r"\bregulat", r"\blaw(suit)?\b", r"\blegal\b", r"\bcourt\b", r"\bsue[sd]?\b", r"\bsenate\b",
-               r"\bcongress\b", r"\beu ai act\b", r"\bban(ned|ning)?\b", r"\bcopyright\b", r"\bprivacy\b",
-               r"\bgdpr\b", r"\bantitrust\b", r"\bexecutive order\b", r"\bwhite house\b", r"\bpolicy\b",
-               r"\bsafety (bill|act|framework|institute)\b", r"\bgovernance\b", r"\bexport control"],
-    "opensource": [r"\bopen.source\b", r"\bopen.weights\b", r"\bgithub\b", r"\bhugging face\b",
-                   r"\bapache\b", r"\bmit license\b", r"\bcommunity (model|release)\b", r"\bollama\b",
-                   r"\bllama.cpp\b", r"\bgguf\b", r"\bquantiz", r"\blocal(ly)? (run|run|host|model)"],
-}
+# -------- Vertical gate: each must match one of these on title+snippet --------
+GAME_RE = re.compile(
+    r"\b(gam(e|ing|es|er)|gameplay|video\s*game|videogame|indie\s*game|"
+    r"steam(\s*deck)?|unity(\s*engine)?|unreal(\s*engine)?|godot|"
+    r"nintendo|playstation|xbox|minecraft|fortnite|epic\s*games|"
+    r"twitch|esports|game\s*dev(elo?pment|eloper)?|gamedev|"
+    r"game\s*studio|game\s*engine|level\s*design|"
+    r"shader|ray\s*tracing|dlss|fsr|gpu\s*benchmark|"
+    r"fps|rpg|mmorpg|moba|roguelike|roguelite|"
+    r"battle\s*pass|season\s*pass|dlc|early\s*access|alpha|beta|"
+    r"kickstarter|backerkit|crowdfund(ing)?|"
+    r"switch(\s*2)?|ps5|xbox\s*series|playstation\s*5|"
+    r"GDC|gamescom|E3|"
+    r"godot|unreal|unity|ue5|ue4|"
+    r"baldur'?s\s*gate|stardew|terraria|hades|hollow\s*knight|"
+    r"playtest|gameplay|dungeon|raid|loot|boss|"
+    r"nintendo\s*direct|ps\s*showcase|state\s*of\s*play|xbox\s*showcase|"
+    r"valve|steamworks|steam\s*next\s*fest|"
+    r"ray\s*tracing|path\s*tracing|framerate|"
+    r"modder|modding|game\s*mod|game\s*hack|cheat\s*engine|"
+    r"speedrun|"
+    r"artstation|itch\.io|game\s*jolt|"
+    r"game\s*award|the\s*game\s*awards|"
+    r"console|controller|gaming\s*pc|handheld|steam\s*deck|"
+    r"switch\s*2)\b", re.I)
+
+APP_RE = re.compile(
+    r"\b(app\s*store|play\s*store|"
+    r"\b(ios|ipados|macos|android|windows|linux)\b|"
+    r"iphone|ipad|ipod|"
+    r"pixel\s*\d|galaxy|surface\s*(pro|laptop|go)|"
+    r"macbook|airpods|apple\s*watch|"
+    r"xcode|swift|swiftui|objective-?c|kotlin|jetpack|compose|flutter|dart|"
+    r"react\s*native|ionic|cordova|xamarin|"
+    r"testflight|app\s*store\s*connect|google\s*play\s*console|"
+    r"ipa|apk|aab|app\s*bundle|"
+    r"app\s*launch|app\s*release|app\s*update|app\s*beta|app\s*review|app\s*rating|"
+    r"app\s*developer|app\s*development|app\s*dev|"
+    r"app\s*downloads|monthly\s*active\s*users|mau|"
+    r"in-?app\s*purchase|subscription|freemium|premium\s*app|"
+    r"ASO|app\s*store\s*optimization|app\s*localization|"
+    r"vision\s*pro|visionos|watchos|tvos|"
+    r"indie\s*app|indie\s*developer|indie\s*hacker|"
+    r"mobile\s*dev|mobile\s*app|tablet|smartphone|"
+    r"google\s*play|apple\s*store|microsoft\s*store|"
+    r"vision\s*os|foldable|"
+    r"public\s*beta|developer\s*preview|gm\s*\(|gold\s*master|"
+    r"release\s*candidate|stable\s*release|"
+    r"app\s*maintenance|app\s*deprecation|app\s*removal|"
+    r"app\s*store\s*award|app\s*store\s*editor|"
+    r"wear\s*os|fitbit|garmin|oura|"
+    r"e-?ink|e-reader|kindle|kobo|"
+    r"roku|fire\s*tv|chromecast|apple\s*tv|android\s*tv|"
+    r"smart\s*speaker|alexa|siri|google\s*assistant|"
+    r"app\s*icon|app\s*screenshot|app\s*preview|"
+    r"localization|translation\s*app|"
+    r"e-?commerce|marketplace\s*app|on-?demand|"
+    r"super\s*app|chat\s*app|messaging\s*app|video\s*call|"
+    r"saas\s*app|mobile\s*saas|"
+    r"app\s*analytics|app\s*attribution|app\s*tracking|"
+    r"app\s*shortcut|app\s*clip|"
+    r"apple\s*vision|meta\s*quest|"
+    r"iOS\s*\d|iPadOS\s*\d|macOS\s*\d|android\s*\d|visionOS\s*\d|watchOS\s*\d|"
+    r"app\s*store\s*connect|testflight|app\s*store\s*server|"
+    r"app\s*intents|app\s*shortcuts|siri\s*kit|app\s*clips|"
+    r"core\s*haptics|metal\s*api|vulkan\s*api|"
+    r"uikit|appkit|swiftui|combine|swiftdata|swift\s*concurrency|"
+    r"push\s*notification|deep\s*link|universal\s*link|app\s*link|"
+    r"in-app\s*event|server-?to-?server\s*notification|"
+    r"apple\s*sign\s*in|google\s*sign\s*in|passkey\s*in\s*app|"
+    r"on-?device\s*ml\s*in\s*app|core\s*ml|tflite|ml\s*kit|"
+    r"app\s*widget|home\s*screen|live\s*activity|"
+    r"app\s*update\s*required|app\s*compatibility|"
+    r"ios\s*app\s*store|mac\s*app\s*store|"
+    r"app\s*pre-?order|app\s*subscription\s*pricing|"
+    r"app\s*store\s*featured|app\s*store\s*charts|"
+    r"app\s*analytics|crashlytics|firebase\s*crashlytics|"
+    r"app\s*size|app\s*binary|app\s*thinning|"
+    r"play\s*store\s*featured|play\s*store\s*charts|"
+    r"app\s*signing|app\s*notarization|app\s*sandbox)\b", re.I)
+
+ART_RE = re.compile(
+    r"\b("
+    r"illustration|illustrator|illustrated|"
+    r"digital\s*art|concept\s*art|character\s*design|environment\s*design|"
+    r"2d\s*art|3d\s*art|2d\s*animation|3d\s*animation|"
+    r"3d\s*model|3d\s*modeling|3d\s*modelling|"
+    r"cgi|vfx|visual\s*effect|"
+    r"animation\s*(studio|director|lead)?|animator|animated|"
+    r"motion\s*capture|mocap|motion\s*graphics|"
+    r"storyboard|storyboarding|"
+    r"graphic\s*novel|manga|anime|webtoon|manhwa|"
+    r"artstation|behance|dribbble|deviant\s*art|"
+    r"ray\s*tracing|path\s*tracing|pathtracer|"
+    r"octane\s*render|redshift|arnold|cycles|eevee|"
+    r"blender(\s+(news|foundation|conference|survey|release|annual|siggraph|annecy|in\s+))?|"
+    r"cinema\s*4d|\bc4d\b|autodesk\s*maya|\bmaya\b|"
+    r"zbrush|substance\s*(painter|designer)?|"
+    r"houdini|\bnuke\b|after\s*effects|"
+    r"procreate|\bkrita\b|"
+    r"speedpaint|time-?lapse|art\s*process|art\s*tutorial|"
+    r"color\s*theory|matte\s*painting|prop\s*design|creature\s*design|"
+    r"sculpting|sculptor|\bsculpt\b|rigging|retopology|uv\s*map|texturing|"
+    r"pixel\s*art|voxel|low-?poly|high-?poly|"
+    r"graphic\s*design|graphic\s*designer|"
+    r"typography|font\s*design|logo\s*design|branding|"
+    r"ux\s*design|interaction\s*design|"
+    r"fashion\s*design|interior\s*design|architectural\s*design|"
+    r"art\s*director|art\s*team|art\s*direction|"
+    r"designboom|dezeen|creative\s*bloq|"
+    r"art\s*gallery|art\s*exhibition|art\s*show|"
+    r"art\s*book|art\s*print|art\s*commission|"
+    r"sketchfab|polyhaven|textures\.com|"
+    r"artstation\s*challenge|concept\s*art\s*challenge|"
+    r"render\s*week|render\s*competition|"
+    r"artstation\s*mag|artstation\s*featured|"
+    r"adobe\s*creative|adobe\s*max|adobe\s*firefly|adobe\s*substance|"
+    r"figma\s*art|figma\s*design|figma\s*community|"
+    r"artstation\s*trending|artstation\s*frontpage|"
+    r"character\s*art(ist)?|character\s*sheet|"
+    r"creature\s*art(ist)?|"
+    r"environment\s*art(ist)?|"
+    r"hard-?surface|hard\s*surface\s*modeling|"
+    r"organic\s*modeling|"
+    r"prop\s*art(ist)?|"
+    r"vfx\s*artist|vfx\s*breakdown|vfx\s*reel|"
+    r"art\s*reel|art\s*showcase|art\s*portfolio|"
+    r"art\s*school|art\s*college|art\s*university|art\s*degree|"
+    r"art\s*funding|art\s*grant|art\s*residency|"
+    r"art\s*kickstarter|art\s*crowdfund|"
+    r"art\s*news|art\s*world|art\s*market|art\s*auction|"
+    r"art\s*collector|art\s*collection|"
+    r"illustration\s*award|art\s*award|art\s*prize|"
+    r"artstation\s*live|artstation\s*podcast|artstation\s*interview|"
+    r"artstation\s*tutorial|artstation\s*course|artstation\s*class|"
+    r"artstation\s*magazine|"
+    r"creative\s*review|creative\s*boom|"
+    r"art\s*direction\s*award|adc\s*award|"
+    r"d&ad|clio\s*award|one\s*show|"
+    r"red\s*dot|if\s*design|ida\s*design|"
+    r"design\s*week|milan\s*design|"
+    r"art\s*basel|frieze|"
+    r"adobe\s*stock|shutterstock|getty\s*images|"
+    r"envato|creative\s*market|"
+    r"cgtrader|turbo\s*squid|3docean|"
+    r"texture\s*artist|texture\s*art|"
+    r"lighting\s*artist|lighting\s*art|"
+    r"matte\s*painter|matte\s*artist|"
+    r"compositing|composit(ing|er)|nuke\s*compositing|"
+    r"look\s*dev|lookdev|look\s*development|"
+    r"asset\s*creation|asset\s*artist|"
+    r"character\s*modeler|environment\s*modeler|"
+    r"prop\s*modeler|hard\s*surface\s*modeler|"
+    r"rigging\s*artist|technical\s*artist|"
+    r"shader\s*artist|effects\s*artist|"
+    r"storyboard\s*artist|story\s*artist|"
+    r"previs|pre-visualization|"
+    r"animatic|"
+    r"shotgun|flow\s*production\s*tracking|ftrack)\b", re.I)
+
+WEB_RE = re.compile(
+    r"\b("
+    r"web\s*dev(elo?pment|eloper)?|"
+    r"web\s*developer|web\s*app(lication)?\b|"
+    r"front-?end|back-?end|fullstack|full-?stack|"
+    r"web\s*framework|"
+    r"javascript|typescript|js\s+frame|ts\s+compiler|"
+    r"react(\.?js)?|vue(\.?js)?|angular|svelte|solidjs|qwik|astro|"
+    r"next(\.?js|\s*js)?|nuxt|remix|gatsby|"
+    r"html5|css3|scss|sass|less|postcss|"
+    r"tailwind(\s*css)?|bootstrap|chakra|mui|"
+    r"webpack|vite|parcel|esbuild|turbopack|rollup|swc|babel|"
+    r"npm|yarn|pnpm|bun|deno|"
+    r"node(\.?js)?|express(\.?js)?|fastify|koa|nestjs|"
+    r"graphql|trpc|"
+    r"prisma|drizzle|supabase|planetscale|neon|"
+    r"vercel\s+(blog|changelog|platform)|netlify\s+(blog|changelog)|"
+    r"jamstack|ssr|ssg|isr|spa|hydration|"
+    r"lighthouse|core\s*web\s*vitals|web\s*vitals|page\s*speed|"
+    r"web\s*accessibility|a11y|wai-aria|wcag|"
+    r"csp|cors|xss|csrf|samesite|"
+    r"webassembly|wasm|webgpu|webgl|webaudio|"
+    r"service\s*worker|web\s*worker|progressive\s*web\s*app|pwa\b|"
+    r"container\s*queries|view\s*transitions|"
+    r"web\s*components|custom\s*elements|shadow\s*dom|"
+    r"responsive\s*design|mobile-?first|adaptive\s*design|"
+    r"variable\s*font|woff2|"
+    r"chrome\s*devtools|firefox\s*dev|safari\s*tech|"
+    r"whatwg|w3c|csswg|"
+    r"polyfill|tsc\s*config|"
+    r"sveltekit|nextjs|nuxtjs|"
+    r"eslint|prettier|biome|"
+    r"vitest|jest|playwright|cypress|testing\s*library|"
+    r"web\s*performance|bundle\s*size|tree-?shaking|"
+    r"web\s*app\s*manifest|web\s*push|notifications\s*api|"
+    r"clipboard\s*api|share\s*api|web\s*share|"
+    r"intersection\s*observer|mutation\s*observer|"
+    r"localstorage|sessionstorage|indexed\s*db|"
+    r"cdn|edge\s*computing|edge\s*function|"
+    r"serverless|lambda|cloud\s*function|"
+    r"web\s*standard|web\s*platform|"
+    r"turborepo|monorepo|"
+    r"package\.json|tsconfig|jsconfig|"
+    r"caniuse|mdn\s*blog|mdn\s*reference|"
+    r"hsts|preload|prefetch|preconnect|"
+    r"t3-?app|t3\s*stack|"
+    r"astro\s*islands|qwik\s*city|"
+    r"htmx|hotwire|turbo\s*frames|"
+    r"unocss|windicss|vanilla-?extract|stitches|"
+    r"styled-?components|emotion\s*css|"
+    r"radix\s*ui|shadcn(\s*ui)?|"
+    r"framer-?motion|gsap|lottie\s*web|"
+    r"three\.js|babylon\.js|react\s*three\s*fiber|"
+    r"d3(\.?js)?|chart\.js|plotly|observable\s*plot|"
+    r"tanstack\s*query|swr|react\s*query|"
+    r"zod|yup|valibot|"
+    r"svelte\s*5|runes\s*svelte|"
+    r"hono|elysia|solidstart|"
+    r"qwik\s*resumable|remix\s*v2|"
+    r"css\s*subgrid|@layer|css\s*cascade|"
+    r":has\(\)|:where\(\)|:is\(\)|"
+    r"popover|toplayer|dialog\s*element|"
+    r"anchor\s*positioning|"
+    r"view\s*transitions\s*api|"
+    r"webtransport|webcodecs|"
+    r"web\s*locks|web\s*streams|"
+    r"web\s*transport|web\s*codecs|"
+    r"web\s*nfc|web\s*usb|web\s*serial|web\s*bluetooth|"
+    r"origin\s*private\s*file\s*system|"
+    r"web\s*nn|web\s*machine\s*learning|"
+    r"webauthn|passkey|webauthn\s*api|"
+    r"web\s*crypto|crypto\s*api|"
+    r"fetch\s*api|xhr|"
+    r"oauth|jwt|webauthn|"
+    r"webdriver|"
+    r"playwright\s*api|"
+    r"cypress|"
+    r"webdriverio|"
+    r"axe-core|"
+    r"core\s*web\s*vitals\s*\d|"
+    r"lighthouse\s*ci|"
+    r"web\s*core\s*vitals|"
+    r"first\s*contentful\s*paint|"
+    r"largest\s*contentful\s*paint|"
+    r"cumulative\s*layout\s*shift|"
+    r"first\s*input\s*delay|"
+    r"interaction\s*to\s*next\s*paint|"
+    r"the\s*web\s*platform|"
+    r"web\s*platform\s*status|"
+    r"web\s*platform\s*incubator|"
+    r"openjs|"
+    r"open\s*web|"
+    r"interoperability|"
+    r"web\s*manifest|"
+    r"web\s*app\s*spec|"
+    r"web\s*spec|"
+    r"web-?platform-?tests|"
+    r"interop-?\d|"
+    r"lighthouse\s*audit|"
+    r"lighthouse\s*score|"
+    r"web-?vitals-?js|"
+    r"css\s*anchor\s*positioning|"
+    r"scroll\s*driven\s*animations|"
+    r"css\s*timeline|"
+    r":view-transition|"
+    r"css\s*highlight\s*api|"
+    r"openjs\s*world|"
+    r"openjs\s*conference|"
+    r"jsconf|"
+    r"css\s*conf|"
+    r"smashing\s*conf|"
+    r"a11y\s*project|"
+    r"smashing\s*magazine|"
+    r"css-?tricks|"
+    r"web\s*design\s*ledger|"
+    r"freecodecamp|"
+    r"frontendmentor|"
+    r"the\s*odin\s*project|"
+    r"javascript\.info|"
+    r"typescriptlang\.org|"
+    r"dev\.to|"
+    r"web\s*tools\s*weekly|"
+    r"web\s*design\s*weekly|"
+    r"javascript\s*weekly|"
+    r"frontend\s*focus|"
+    r"css\s*weekly|"
+    r"a11y\s*weekly|"
+    r"web\s*performance\s*weekly|"
+    r"react\s*hooks|react\s*state|react\s*context|"
+    r"react\s*router|react\s*form|"
+    r"react\s*native|"
+    r"vue\s*3|vue\s*2|"
+    r"vue\s*cli|vuex|pinia|"
+    r"nuxt\s*3|nuxt\s*2|"
+    r"angular\s*\d|"
+    r"angular\s*cli|"
+    r"rxjs|ngrx|mobx|redux|zustand|"
+    r"jotai|recoil|valtio|xstate|"
+    r"manifest\.json|webmanifest|"
+    r"web\s*push\s*api|push\s*api|"
+    r"broadcast\s*channel|shared\s*worker|"
+    r"css\s*modules|css\s*scope|"
+    r"@container|@layer|@property|@scope|"
+    r"@supports|@keyframes|@import|"
+    r"@view-transition|@scroll-timeline|"
+    r"@position-try|@anchor|"
+    r"startViewTransition|"
+    r"interesttarget|"
+    r"position-anchor|position-try|"
+    r"anchor-name|anchor-size|"
+    r"css-grid|css-flexbox|"
+    r"css-multicol|css-cascade|"
+    r"css-values|css-syntax|"
+    r"css-conditional|"
+    r"css-pseudo|css-overflow|"
+    r"web-animations|"
+    r"compositor|"
+    r"build\s*tool|bundler|"
+    r"webpack-dev-server|"
+    r"importmap|"
+    r"json\s*module\b|"
+    r"constructable\s*stylesheet|"
+    r"adopted\s*stylesheet|"
+    r"module\s*worker|"
+    r"form-associated|"
+    r"custom\s*built-in|"
+    r"declarative\s*shadow|"
+    r"declarative\s*custom|"
+    r"speculation\s*rules|"
+    r"prerender\s*api|"
+    r"view\s*transitions|"
+    r"view-transition|"
+    r"view\s*transition-)"
+    r"\b", re.I)
+
+# Combined gate — post must match at least one vertical
+DEV_RE = re.compile("|".join([GAME_RE.pattern, APP_RE.pattern, ART_RE.pattern, WEB_RE.pattern]), re.I)
+
+# Legacy aliases (no longer used; keep imports quiet)
+HN_AI_RE = DEV_RE
+ARXIV_KEEP_RE = DEV_RE
+GNEWS_NOISE_RE = re.compile(
+    r"\b(horoscope|editorial\s*cartoon|match\s*preview|"
+    r"live\s*score|betting\s*tips?|lineup\s*prediction|"
+    r"sports\s*betting|gambling\s*odds|fantasy\s*football|"
+    r"daily\s*horoscope|zodiac|astrology|"
+    r"celebrity\s*gossip|kardashian|"
+    r"fashion\s*week\s*celebrity|red\s*carpet\s*gossip)\b", re.I)
+
+# Content gate (replaces the old AI-only gate)
+DEV_GATE = DEV_RE
+REQUIRE_RES = {"dev_gate": DEV_GATE}
 
 STOPWORDS = {"the", "and", "for", "with", "that", "this", "from", "your", "you", "are", "was",
              "how", "why", "what", "when", "where", "who", "will", "can", "its", "it's", "has",
@@ -136,7 +460,6 @@ GH_KEEP_RE = re.compile(
     r"openai|anthropic|claude|gemini|llama|mistral|copilot|cursor|deepseek|qwen|ollama|"
     r"prompt|langchain|vector|models?)\b",
     re.I)
-REQUIRE_RES = {"ai": GH_KEEP_RE}
 # Populated by load_sources(): source id -> require flag (for history purging too)
 REQUIRE_BY_ID: dict = {}
 
@@ -459,25 +782,31 @@ FETCHERS = {"rss": fetch_rss, "arxiv": fetch_arxiv, "gnews": fetch_gnews,
 # Categorize / score
 # --------------------------------------------------------------------------
 
-CAT_RES = {k: [re.compile(p, re.I) for p in pats] for k, pats in CAT_RULES.items()}
+CAT_RES = {"game": GAME_RE, "app": APP_RE, "art": ART_RE, "web": WEB_RE}
 
 
 def categorize(a: dict) -> str:
-    if a.get("cat"):
-        return a["cat"]
-    text = (a["title"] + " " + a["snippet"]).lower()
-    scores = {}
-    for cat, pats in CAT_RES.items():
-        s = sum(1 for p in pats if p.search(text))
-        if s:
-            scores[cat] = s
+    """Assign one of 4 verticals.
+
+    Prefer a source-pinned `cat` from sources.json when present (the fetcher
+    passes it through). Fall back to title+snippet scoring: the vertical
+    whose regex hits the most wins; ties broken by CAT_PRIORITY order.
+    Post must hit at least one vertical (the strict gate in fetch_all / merge
+    already filters out non-matches before we get here).
+    """
+    pinned = a.get("cat")
+    if pinned in CATEGORIES:
+        return pinned
+    text = a["title"] + " " + a.get("snippet", "")
+    scores = {cat: len(p.findall(text)) for cat, p in CAT_RES.items()}
+    scores = {k: v for k, v in scores.items() if v > 0}
     if not scores:
-        return "industry"
+        return "web"  # soft default (one of 4 must match by gate)
     best = max(scores.values())
     for cat in CAT_PRIORITY:
-        if scores.get(cat) == best:
+        if scores.get(cat, 0) == best:
             return cat
-    return "industry"
+    return "web"
 
 
 def hot_score(a: dict) -> float:
@@ -497,9 +826,11 @@ def hot_score(a: dict) -> float:
 # --------------------------------------------------------------------------
 
 DIGEST_SYSTEM = (
-    "You are the editor of \"AI Pulse\", a daily AI-news dashboard read by a senior software "
-    "engineer who builds with AI. Write a tight executive briefing from the numbered stories. "
-    "Be specific and factual: names, numbers, releases. No hype, no filler. "
+    "You are the editor of \"Dev Pulse\", a daily dev-news dashboard for working "
+    "developers in four verticals: game development, app development, art development, "
+    "and website development. Write a tight executive briefing from the numbered stories. "
+    "Be specific and factual: tool names, version numbers, studio names, framework versions. "
+    "No hype, no filler. "
     'Respond with ONLY minified JSON: {"intro": "one-sentence overview of the day", '
     '"stories": [{"i": <story number>, "why": "one punchy sentence: why this matters"}]}. '
     "Pick the 6-8 most important stories, most important first; if several outlets cover the same event, keep only the strongest one. Keep each 'why' under 140 chars."
@@ -616,7 +947,7 @@ def day_label(dt: datetime) -> tuple[str, str]:
 
 
 def render_card(a: dict) -> str:
-    cat_name, cat_col = CATEGORIES.get(a["cat"], CATEGORIES["industry"])
+    cat_name, cat_col = CATEGORIES.get(a["cat"], CATEGORIES["web"])
     dt = dt_from_iso(a["ts"])
     epoch = int(dt.timestamp())
     search_blob = e((a["title"] + " " + a.get("snippet", ""))[:300])
@@ -833,7 +1164,7 @@ def render_digest(articles: list[dict]) -> tuple[str, str, set]:
 def build():
     t0 = time.time()
     sources = load_sources()
-    print(f"AI Pulse build — {NOW.astimezone(TZ).strftime('%Y-%m-%d %H:%M %Z')} "
+    print(f"Dev Pulse build — {NOW.astimezone(TZ).strftime('%Y-%m-%d %H:%M %Z')} "
           f"| {len(sources)} sources")
     fetched, stats = fetch_all(sources)
     articles, new_count = merge_history(fetched)
@@ -902,8 +1233,8 @@ def build():
         '<meta property="og:image" content="assets/og-image.png">'
         '<meta name="twitter:card" content="summary_large_image">'
         '<meta name="twitter:image" content="assets/og-image.png">'
-        '<meta name="twitter:title" content="AI Pulse — every AI signal, one page">'
-        '<meta name="twitter:description" content="Auto-curated AI news from 47 sources, refreshed every 4 hours. $0 forever.">'
+        '<meta name="twitter:title" content="Dev Pulse — every dev signal, one page">'
+        '<meta name="twitter:description" content="Auto-curated dev news for game, app, art and web development, refreshed every 4 hours. $0 forever.">'
     )
     page = page.replace("<link rel=\"alternate\"", head_extras + "<link rel=\"alternate\"", 1)
     (SITE / "index.html").write_text(page, encoding="utf-8")
@@ -940,9 +1271,9 @@ def build():
             "</item>")
     feed = ('<?xml version="1.0" encoding="UTF-8"?>\n'
             '<rss version="2.0"><channel>'
-            "<title>AI Pulse</title>"
+            "<title>Dev Pulse</title>"
             f"<link>{saxutils.escape(SITE_URL)}</link>"
-            "<description>Every AI signal that matters — auto-curated every 4 hours.</description>"
+            "<description>Game, app, art, web dev news — auto-curated every 4 hours.</description>"
             f"<lastBuildDate>{format_datetime(NOW)}</lastBuildDate>"
             + "".join(rss_items) + "</channel></rss>")
     (SITE / "feed.xml").write_text(feed, encoding="utf-8")
@@ -950,9 +1281,9 @@ def build():
 
     # ---------- PWA artifacts ----------
     (SITE / "manifest.webmanifest").write_text(json.dumps({
-        "name": "AI Pulse — every AI signal, one page",
-        "short_name": "AI Pulse",
-        "description": "Auto-curated AI news from 47 sources, refreshed every 4 hours. $0 forever.",
+        "name": "Dev Pulse — every dev signal, one page",
+        "short_name": "Dev Pulse",
+        "description": "Auto-curated dev news for game, app, art and web development, refreshed every 4 hours. $0 forever.",
         "start_url": "./",
         "scope": "./",
         "display": "standalone",
@@ -968,7 +1299,7 @@ def build():
 
     # service worker (cache-shell, network-first for articles.json, swr for feed.xml)
     (SITE / "sw.js").write_text((
-        "const CACHE = 'ai-pulse-v2';\n"
+        "const CACHE = 'dev-pulse-v1';\n"
         "const PRECACHE = ['./', 'index.html', 'articles.json', 'feed.xml', 'manifest.webmanifest', "
         "'assets/apple-touch-icon.png', 'assets/og-image.png', 'favicon-32.png', 'favicon-192.png'];\n"
         "self.addEventListener('install', e => { self.skipWaiting(); "
@@ -1057,9 +1388,9 @@ def build():
                 od.ellipse((cx - r, cy - r, cx + r, cy + r), outline=col)
         # title
         f1 = _font(98); f2 = _font(40)
-        od.text((72, 200), "AI Pulse", fill=(240, 240, 250), font=f1)
-        od.text((72, 320), "Every AI signal. One page. Zero noise.", fill=(0, 210, 255), font=f2)
-        od.text((72, 400), f"47 sources · 1,160+ stories tracked · $0 forever", fill=(154, 154, 180), font=f2)
+        od.text((72, 200), "Dev Pulse", fill=(240, 240, 250), font=f1)
+        od.text((72, 320), "Game. App. Art. Web. One dev feed. Zero noise.", fill=(0, 210, 255), font=f2)
+        od.text((72, 400), f"%%SOURCES_TOTAL%% sources · 4 verticals · $0 forever", fill=(154, 154, 180), font=f2)
         od.text((72, 540), "wetiu.github.io/ai-pulse-deephermes", fill=(108, 92, 231), font=f2)
         og.save(assets / "og-image.png")
 

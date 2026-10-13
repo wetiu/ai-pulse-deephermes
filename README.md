@@ -1,23 +1,32 @@
-# AI Pulse
+# Dev Pulse
 
-> **Every AI signal. One page. Zero noise.**
+> **Game. App. Art. Web. One dev feed. Zero noise.**
 
-A self-updating AI news dashboard that runs entirely in GitHub's cloud — 4× a day, forever, at **$0/month**. No servers you maintain, no accounts, no API bills, no machine required: your PC can be off for months and the site keeps updating.
+A self-updating dev-news dashboard that runs entirely in GitHub's cloud — 4× a day, forever, at **$0/month**. No servers you maintain, no accounts, no API bills, no machine required: your PC can be off for months and the site keeps updating.
 
-**Live:** `https://<owner>.github.io/ai-pulse/`
+Strictly **game development, app development, art development, and website development** news. Every post is filtered through a per-vertical regex gate — anything off-topic is dropped at the source.
+
+**Live:** `https://wetiu.github.io/ai-pulse-deephermes/`
 
 ---
 
 ## What you get
 
-- **47 keyless sources** — OpenAI, Anthropic, Google DeepMind, Google Research, Meta, Microsoft, Mistral, HuggingFace, NVIDIA, arXiv, HN, Lobsters, TLDR AI, Last Week in AI, The Verge, TechCrunch, Ars Technica, Import AI, Interconnects, Simon Willison, Latent Space, Google News… all free, no keys, no signup.
+- **35 keyless sources** across 4 verticals:
+  - **Game** (7) — Game Developer, Unity, Godot, PC Gamer, IGN, Rock Paper Shotgun, r/gamedev (HN)
+  - **App** (9) — The Verge Tech, TechCrunch Apps, MacRumors, 9to5Mac, Ars Technica, Android Dev, Apple Dev, App Store Top Free, Product Hunt
+  - **Art** (9) — Blender, Creative Bloq, ArtStation, Designboom, Dezeen, The Verge (art), r/Art (HN), DeviantArt, Concept Art Empire
+  - **Web** (10) — CSS-Tricks, Smashing Magazine, MDN, web.dev, r/webdev (HN), TechCrunch, GitHub Engineering, Vercel, CSS Weekly, Frontend Focus
+- **Strict title gate** — every post must match one of the 4 verticals' regex; off-topic posts never make it in
 - **Today's Briefing** — an executive summary auto-edited by a free LLM (GitHub Models tier), ranked by source quality + community signal + freshness. Gracefully degrades to algorithmic ranking if the LLM tier is unavailable.
-- **Search / archive** — full-text search across ~1,200+ tracked stories with an on-demand archive search over the whole history.
-- **Filters** — 7 categories (Models, Research, Policy, Business, Tools, Open Source, Industry) + per-source toggles, all client-side.
+- **Search / archive** — full-text search across tracked stories with on-demand archive search over the whole history.
+- **Filters** — 4 categories (Game, App, Art, Web) + per-source toggles, all client-side.
 - **Trending rail** — the 48-hour heat list, deduplicated against the briefing.
 - **RSS feed** — `feed.xml` for your reader of choice.
-- **Self-healing** — per-source failure tolerance (one dead feed can never kill the build), history merge keeps stories across builds, noise filters purge junk automatically.
-- **Cyberpunk-neon glassmorphic UI** — search, sort, load-older paging, zero dependencies, pure static HTML.
+- **PWA** — installable to phone home-screen, offline cache, custom 1200×630 OG image.
+- **Premium micro-interactions** — Cmd/Ctrl-K command palette, j/k keyboard nav, image lightbox, scroll progress, back-to-top, source health summary, topbar freshness dot.
+- **Self-healing** — per-source failure tolerance (one dead feed can never kill the build), history merge keeps stories across builds.
+- **Cyberpunk-neon glassmorphic UI** — zero dependencies, pure static HTML.
 
 ## How it works
 
@@ -27,21 +36,22 @@ A self-updating AI news dashboard that runs entirely in GitHub's cloud — 4× a
    │  cron 17 */4 * *    +    push to main    +    manual │
    │                     │                                │
    │              python build.py                         │
-   │   47 sources ──► fetch (threads) ──► clean/dedupe    │
+   │   35 sources ──► fetch (threads) ──► strict gate    │
    │        │              │                   │          │
    │        │         per-source stats    history merge   │
    │        ▼              ▼                   ▼          │
    │   Feed + digest + rail + articles.json + feed.xml    │
+   │   + manifest + sw.js + icons + OG image              │
    └───────────────────────────┬────────────────────────┘
                                ▼
                     GitHub Pages (static, free CDN)
                                ▼
-                     https://<owner>.github.io/ai-pulse/
+                  https://wetiu.github.io/ai-pulse-deephermes/
 ```
 
 - **Schedule:** `17 */4 * * *` — 6 runs/day, offset :17 to dodge the top-of-hour cron stampede.
 - **Hosting:** GitHub Pages, deployed from Actions artifacts. Free, global CDN, HTTPS.
-- **Build time:** ~4 s (fetch) + deploy, well under the 20-minute timeout.
+- **Build time:** ~5 s (fetch) + deploy, well under the 20-minute timeout.
 - **State:** `data/history.json` (repo root) is committed back by the workflow each run, so stories persist across builds.
 
 ## Why $0 forever
@@ -89,34 +99,32 @@ gh auth login        # once — GitHub CLI, choose HTTPS + browser
 
 ```json
 {"sources": [
-  {"id": "openai", "name": "OpenAI", "kind": "rss", "url": "https://openai.com/news/rss.xml", "weight": 3}
+  {"id": "unity_blog", "name": "Unity Blog", "kind": "rss",
+   "url": "https://blog.unity.com/feed", "weight": 3, "cat": "game"}
 ]}
 ```
 
 | kind | behavior |
 |---|---|
 | `rss` | any RSS/Atom feed (feedparser) |
-| `arxiv` | arXiv export-API category feed (recent AI papers) |
 | `hn` | Hacker News Algolia API (`points` boost) |
-| `gnews` | Google News RSS search query |
-| `hfpapers` | HuggingFace Daily Papers API |
-| `anthropic` | dedicated parser (Anthropic has no RSS) |
 
-`weight` (0–3) feeds ranking. Add `"require": "ai"` to a source to keep only AI-matching items (used for the general GitHub Trending firehose). Noise filters and the AI gate live in `build.py` (regexes at the top).
+`weight` (0–3) feeds ranking. `cat` pins the article to one of the 4 verticals; without it, the strict regex gate categorizes on title+snippet. Sources are dropped if neither the source's vertical nor the article's title matches any of the 4 verticals.
 
 After editing, run the probe to confirm health: `.venv/bin/python tools/check_sources.py --all`.
 
 ## Files
 
 ```
-build.py                     engine: fetch → clean → rank → render (std lib + feedparser)
-sources.json                 47-source registry
-templates/index.html         the entire UI (design system + client JS, zero dependencies)
+build.py                     engine: fetch → strict-gate → clean → rank → render
+sources.json                 35-source registry, 4 verticals
+templates/index.html         the entire UI (design system + client JS + PWA, zero deps)
 tools/check_sources.py       feed health probe (STATUS entries bozo ms url)
 .github/workflows/update.yml 4-hourly build + Pages deploy
 deploy.sh                    one-shot GitHub setup
 data/                        persistent store (history.json — merged across builds, auto-committed)
-_site/                       build output (index.html, articles.json, feed.xml, stats.json)
+_site/                       build output (index.html, articles.json, feed.xml, stats.json,
+                             manifest.webmanifest, sw.js, icons)
 ```
 
 ## License
