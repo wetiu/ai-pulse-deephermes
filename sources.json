@@ -1,43 +1,619 @@
 {
-  "_comment": "Dev Pulse — 4-vertical dev-news feed (game/app/art/web). All keyless RSS/Atom/JSON. Strict title gate in build.py filters to these 4 verticals. Maintain with tools/check_sources.py.",
+  "_comment": "AI Pulse \u2014 4-vertical AI-dev news feed (ai/game/web/app). All keyless RSS/Atom/JSON. Strict title gate in build.py filters to these 4 verticals. Maintain with tools/check_sources.py.",
   "sources": [
-    {"id": "gamedeveloper",   "name": "Game Developer",            "kind": "rss",  "url": "https://www.gamedeveloper.com/rss.xml", "weight": 3, "require": "dev_gate", "cat": "game"},
-    {"id": "unity_blog",      "name": "Unity Blog",                "kind": "rss",  "url": "https://blog.unity.com/feed", "weight": 3, "require": "dev_gate", "cat": "game"},
-    {"id": "godot_blog",      "name": "Godot Engine Blog",         "kind": "rss",  "url": "https://godotengine.org/rss.xml", "weight": 3, "require": "dev_gate", "cat": "game"},
-    {"id": "pcgamer",         "name": "PC Gamer",                  "kind": "rss",  "url": "https://www.pcgamer.com/rss/", "weight": 2, "require": "dev_gate", "cat": "game"},
-    {"id": "rockpapershotgun","name": "Rock Paper Shotgun",        "kind": "rss",  "url": "https://www.rockpapershotgun.com/feed", "weight": 2, "require": "dev_gate", "cat": "game"},
-    {"id": "ign",             "name": "IGN",                       "kind": "rss",  "url": "https://feeds.feedburner.com/ign/all", "weight": 2, "require": "dev_gate", "cat": "game"},
-    {"id": "indie_dev",       "name": "r/gamedev (HN)",            "kind": "hn",   "url": "https://hn.algolia.com/api/v1/search_by_date?query=game+development&tags=story&numericFilters=points%3E50&hitsPerPage=40", "weight": 2, "require": "dev_gate", "cat": "game"},
-
-    {"id": "verge_tech",      "name": "The Verge Tech",            "kind": "rss",  "url": "https://www.theverge.com/rss/index.xml", "weight": 2.5, "require": "dev_gate", "cat": "app"},
-    {"id": "techcrunch_app",  "name": "TechCrunch Apps",           "kind": "rss",  "url": "https://techcrunch.com/category/apps/feed/", "weight": 2.5, "require": "dev_gate", "cat": "app"},
-    {"id": "macrumors",       "name": "MacRumors",                 "kind": "rss",  "url": "https://feeds.macrumors.com/MacRumors-All", "weight": 2, "require": "dev_gate", "cat": "app"},
-    {"id": "9to5mac",         "name": "9to5Mac",                   "kind": "rss",  "url": "https://9to5mac.com/feed/", "weight": 2, "require": "dev_gate", "cat": "app"},
-    {"id": "ars_tech",        "name": "Ars Technica",              "kind": "rss",  "url": "https://feeds.arstechnica.com/arstechnica/technology-lab", "weight": 2.5, "require": "dev_gate", "cat": "app"},
-    {"id": "android_dev",     "name": "Android Developers Blog",   "kind": "rss",  "url": "https://android-developers.googleblog.com/feeds/posts/default", "weight": 2.5, "require": "dev_gate", "cat": "app"},
-    {"id": "apple_dev",       "name": "Apple Developer News",      "kind": "rss",  "url": "https://developer.apple.com/news/rss/news.rss", "weight": 2.5, "require": "dev_gate", "cat": "app"},
-    {"id": "app_store",       "name": "App Store Top Free (US)",   "kind": "rss",  "url": "https://rss.applemarketingtools.com/api/v2/us/apps/top-free/50/apps.rss", "weight": 1.5, "require": "dev_gate", "cat": "app"},
-    {"id": "producthunt",     "name": "Product Hunt",              "kind": "rss",  "url": "https://www.producthunt.com/feed", "weight": 2, "require": "dev_gate", "cat": "app"},
-
-    {"id": "blender",         "name": "Blender News",              "kind": "rss",  "url": "https://www.blender.org/feed/", "weight": 3, "require": "dev_gate", "cat": "art"},
-    {"id": "creativebloq",    "name": "Creative Bloq",             "kind": "rss",  "url": "https://www.creativebloq.com/feed", "weight": 2, "require": "dev_gate", "cat": "art"},
-    {"id": "artstation_blog", "name": "ArtStation Blog",           "kind": "rss",  "url": "https://magazine.artstation.com/feed", "weight": 2.5, "require": "dev_gate", "cat": "art"},
-    {"id": "designboom",      "name": "Designboom",                "kind": "rss",  "url": "https://www.designboom.com/feed/", "weight": 2, "require": "dev_gate", "cat": "art"},
-    {"id": "dezeen",          "name": "Dezeen",                    "kind": "rss",  "url": "https://www.dezeen.com/feed/", "weight": 2, "require": "dev_gate", "cat": "art"},
-    {"id": "theverge_art",    "name": "The Verge (art mix)",       "kind": "rss",  "url": "https://www.theverge.com/rss/index.xml", "weight": 1.5, "require": "dev_gate", "cat": "art"},
-    {"id": "hn_art",          "name": "r/Art (HN)",                "kind": "hn",   "url": "https://hn.algolia.com/api/v1/search_by_date?query=digital+art+OR+illustration&tags=story&numericFilters=points%3E50&hitsPerPage=40", "weight": 2, "require": "dev_gate", "cat": "art"},
-    {"id": "deviantart",      "name": "DeviantArt",                "kind": "rss",  "url": "https://backend.deviantart.com/rss.xml?q=by%3Asaikano&type=journal", "weight": 1.5, "require": "dev_gate", "cat": "art"},
-    {"id": "conceptart",      "name": "Concept Art Empire",        "kind": "rss",  "url": "https://conceptartempire.com/feed/", "weight": 2, "require": "dev_gate", "cat": "art"},
-
-    {"id": "css_tricks",      "name": "CSS-Tricks",                "kind": "rss",  "url": "https://css-tricks.com/feed/", "weight": 3, "require": "dev_gate", "cat": "web"},
-    {"id": "smashing",        "name": "Smashing Magazine",         "kind": "rss",  "url": "https://www.smashingmagazine.com/feed/", "weight": 3, "require": "dev_gate", "cat": "web"},
-    {"id": "mdn_blog",        "name": "MDN Blog",                  "kind": "rss",  "url": "https://developer.mozilla.org/en-US/blog/rss.xml", "weight": 3, "require": "dev_gate", "cat": "web"},
-    {"id": "webdev_blog",     "name": "web.dev",                   "kind": "rss",  "url": "https://web.dev/feed.xml", "weight": 2.5, "require": "dev_gate", "cat": "web"},
-    {"id": "hn_web",          "name": "r/webdev (HN)",             "kind": "hn",   "url": "https://hn.algolia.com/api/v1/search_by_date?query=web+development&tags=story&numericFilters=points%3E50&hitsPerPage=40", "weight": 2, "require": "dev_gate", "cat": "web"},
-    {"id": "tc_web",          "name": "TechCrunch",                "kind": "rss",  "url": "https://techcrunch.com/feed/", "weight": 2, "require": "dev_gate", "cat": "web"},
-    {"id": "github_blog",     "name": "GitHub Engineering",        "kind": "rss",  "url": "https://github.blog/engineering/feed/", "weight": 2.5, "require": "dev_gate", "cat": "web"},
-    {"id": "vercel_blog",     "name": "Vercel Blog",               "kind": "rss",  "url": "https://vercel.com/atom", "weight": 2.5, "require": "dev_gate", "cat": "web"},
-    {"id": "cssweekly",       "name": "CSS Weekly",                "kind": "rss",  "url": "https://css-weekly.com/feed/", "weight": 2.5, "require": "dev_gate", "cat": "web"},
-    {"id": "frontend_focus",  "name": "Frontend Focus",            "kind": "rss",  "url": "https://frontendfoc.us/rss", "weight": 2.5, "require": "dev_gate", "cat": "web"}
+    {
+      "id": "openai",
+      "name": "OpenAI News",
+      "kind": "rss",
+      "url": "https://openai.com/news/rss.xml",
+      "weight": 3,
+      "cat": "ai"
+    },
+    {
+      "id": "anthropic",
+      "name": "Anthropic",
+      "kind": "anthropic",
+      "url": "https://www.anthropic.com/news",
+      "weight": 3,
+      "cat": "ai"
+    },
+    {
+      "id": "deepmind",
+      "name": "Google DeepMind",
+      "kind": "rss",
+      "url": "https://deepmind.google/blog/rss.xml",
+      "weight": 3,
+      "cat": "ai"
+    },
+    {
+      "id": "googleresearch",
+      "name": "Google Research",
+      "kind": "rss",
+      "url": "https://research.google/blog/rss/",
+      "weight": 2.5,
+      "cat": "ai"
+    },
+    {
+      "id": "googleai",
+      "name": "Google (Keyword)",
+      "kind": "rss",
+      "url": "https://blog.google/technology/ai/rss/",
+      "weight": 2.5,
+      "cat": "ai"
+    },
+    {
+      "id": "metaeng",
+      "name": "Meta Engineering",
+      "kind": "rss",
+      "url": "https://engineering.fb.com/feed/",
+      "weight": 2.5,
+      "cat": "ai"
+    },
+    {
+      "id": "metanews",
+      "name": "Meta News",
+      "kind": "rss",
+      "url": "https://about.fb.com/news/feed/",
+      "weight": 2,
+      "cat": "ai"
+    },
+    {
+      "id": "microsoft",
+      "name": "Microsoft",
+      "kind": "rss",
+      "url": "https://blogs.microsoft.com/feed/",
+      "weight": 2,
+      "cat": "ai"
+    },
+    {
+      "id": "msresearch",
+      "name": "Microsoft Research",
+      "kind": "rss",
+      "url": "https://www.microsoft.com/en-us/research/feed/",
+      "weight": 2.5,
+      "cat": "ai"
+    },
+    {
+      "id": "hf",
+      "name": "Hugging Face",
+      "kind": "rss",
+      "url": "https://huggingface.co/blog/feed.xml",
+      "weight": 3,
+      "cat": "ai"
+    },
+    {
+      "id": "nvidia",
+      "name": "NVIDIA",
+      "kind": "rss",
+      "url": "https://blogs.nvidia.com/feed/",
+      "weight": 2,
+      "cat": "ai"
+    },
+    {
+      "id": "apple",
+      "name": "Apple ML",
+      "kind": "rss",
+      "url": "https://machinelearning.apple.com/rss.xml",
+      "weight": 2.5,
+      "cat": "ai"
+    },
+    {
+      "id": "aws",
+      "name": "AWS ML",
+      "kind": "rss",
+      "url": "https://aws.amazon.com/blogs/machine-learning/feed/",
+      "weight": 2,
+      "cat": "ai"
+    },
+    {
+      "id": "mistral",
+      "name": "Mistral AI",
+      "kind": "rss",
+      "url": "https://mistral.ai/rss.xml",
+      "weight": 3,
+      "cat": "ai"
+    },
+    {
+      "id": "arxiv_ai",
+      "name": "arXiv cs.AI",
+      "kind": "arxiv",
+      "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI&sortBy=submittedDate&sortOrder=descending&max_results=30",
+      "weight": 2,
+      "cap": 25,
+      "cat": "ai"
+    },
+    {
+      "id": "arxiv_cl",
+      "name": "arXiv cs.CL",
+      "kind": "arxiv",
+      "url": "https://export.arxiv.org/api/query?search_query=cat:cs.CL&sortBy=submittedDate&sortOrder=descending&max_results=30",
+      "weight": 2,
+      "cap": 25,
+      "cat": "ai"
+    },
+    {
+      "id": "arxiv_lg",
+      "name": "arXiv cs.LG",
+      "kind": "arxiv",
+      "url": "https://export.arxiv.org/api/query?search_query=cat:cs.LG&sortBy=submittedDate&sortOrder=descending&max_results=30",
+      "weight": 2,
+      "cap": 20,
+      "cat": "ai"
+    },
+    {
+      "id": "hfpapers",
+      "name": "HF Daily Papers",
+      "kind": "hfpapers",
+      "url": "https://huggingface.co/api/daily_papers",
+      "weight": 3.5,
+      "cat": "ai"
+    },
+    {
+      "id": "alignment",
+      "name": "Alignment Forum",
+      "kind": "rss",
+      "url": "https://www.alignmentforum.org/feed.xml",
+      "weight": 2,
+      "cat": "ai"
+    },
+    {
+      "id": "techcrunch",
+      "name": "TechCrunch AI",
+      "kind": "rss",
+      "url": "https://techcrunch.com/category/artificial-intelligence/feed/",
+      "weight": 2.5,
+      "cat": "ai"
+    },
+    {
+      "id": "verge",
+      "name": "The Verge AI",
+      "kind": "rss",
+      "url": "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml",
+      "weight": 2.5,
+      "cat": "ai"
+    },
+    {
+      "id": "arstechnica",
+      "name": "Ars Technica",
+      "kind": "rss",
+      "url": "https://feeds.arstechnica.com/arstechnica/technology-lab",
+      "weight": 2,
+      "cat": "ai"
+    },
+    {
+      "id": "wired",
+      "name": "WIRED AI",
+      "kind": "rss",
+      "url": "https://www.wired.com/feed/tag/ai/latest/rss",
+      "weight": 2,
+      "cat": "ai"
+    },
+    {
+      "id": "mittr",
+      "name": "MIT Tech Review AI",
+      "kind": "rss",
+      "url": "https://www.technologyreview.com/topic/artificial-intelligence/feed",
+      "weight": 2.5,
+      "cat": "ai"
+    },
+    {
+      "id": "thedecoder",
+      "name": "The Decoder",
+      "kind": "rss",
+      "url": "https://the-decoder.com/feed/",
+      "weight": 2.5,
+      "cat": "ai"
+    },
+    {
+      "id": "ieeespectrum",
+      "name": "IEEE Spectrum AI",
+      "kind": "rss",
+      "url": "https://spectrum.ieee.org/feeds/topic/artificial-intelligence.rss",
+      "weight": 2,
+      "cat": "ai"
+    },
+    {
+      "id": "register",
+      "name": "The Register AI",
+      "kind": "rss",
+      "url": "https://www.theregister.com/software/ai_ml/headlines.atom",
+      "weight": 2,
+      "cat": "ai"
+    },
+    {
+      "id": "techxplore",
+      "name": "TechXplore AI",
+      "kind": "rss",
+      "url": "https://techxplore.com/rss-feed/machine-learning-ai-news/",
+      "weight": 1.5,
+      "cat": "ai"
+    },
+    {
+      "id": "marktechpost",
+      "name": "MarkTechPost",
+      "kind": "rss",
+      "url": "https://www.marktechpost.com/feed/",
+      "weight": 1.5,
+      "cat": "ai"
+    },
+    {
+      "id": "kdnuggets",
+      "name": "KDnuggets",
+      "kind": "rss",
+      "url": "https://www.kdnuggets.com/feed",
+      "weight": 1.5,
+      "cat": "ai"
+    },
+    {
+      "id": "infoq",
+      "name": "InfoQ AI/ML",
+      "kind": "rss",
+      "url": "https://feed.infoq.com/ai-ml-data-eng/",
+      "weight": 1.5,
+      "cat": "ai"
+    },
+    {
+      "id": "bbc",
+      "name": "BBC Technology",
+      "kind": "rss",
+      "url": "https://feeds.bbci.co.uk/news/technology/rss.xml",
+      "weight": 1.5,
+      "cat": "ai"
+    },
+    {
+      "id": "simonw",
+      "name": "Simon Willison",
+      "kind": "rss",
+      "url": "https://simonwillison.net/atom/everything/",
+      "weight": 3,
+      "cat": "ai"
+    },
+    {
+      "id": "importai",
+      "name": "Import AI",
+      "kind": "rss",
+      "url": "https://importai.substack.com/feed",
+      "weight": 2.5,
+      "cat": "ai"
+    },
+    {
+      "id": "interconnects",
+      "name": "Interconnects",
+      "kind": "rss",
+      "url": "https://www.interconnects.ai/feed",
+      "weight": 2.5,
+      "cat": "ai"
+    },
+    {
+      "id": "latentspace",
+      "name": "Latent Space",
+      "kind": "rss",
+      "url": "https://www.latent.space/feed",
+      "weight": 2.5,
+      "cat": "ai"
+    },
+    {
+      "id": "oneusefulthing",
+      "name": "One Useful Thing",
+      "kind": "rss",
+      "url": "https://www.oneusefulthing.org/feed",
+      "weight": 2,
+      "cat": "ai"
+    },
+    {
+      "id": "aheadofai",
+      "name": "Ahead of AI",
+      "kind": "rss",
+      "url": "https://magazine.sebastianraschka.com/feed",
+      "weight": 2,
+      "cat": "ai"
+    },
+    {
+      "id": "lastweekai",
+      "name": "Last Week in AI",
+      "kind": "rss",
+      "url": "https://lastweekin.ai/feed",
+      "weight": 2.5,
+      "cat": "ai"
+    },
+    {
+      "id": "smol",
+      "name": "AI News",
+      "kind": "rss",
+      "url": "https://news.smol.ai/rss.xml",
+      "weight": 2.5,
+      "cat": "ai"
+    },
+    {
+      "id": "tldrai",
+      "name": "TLDR AI",
+      "kind": "rss",
+      "url": "https://tldr.tech/api/rss/ai",
+      "weight": 2,
+      "cat": "ai"
+    },
+    {
+      "id": "gnews_ai",
+      "name": "Google News \u00b7 AI",
+      "kind": "gnews",
+      "url": "https://news.google.com/rss/search?q=%22artificial+intelligence%22+when:1d&hl=en-US&gl=US&ceid=US:en",
+      "weight": 1.5,
+      "cat": "ai"
+    },
+    {
+      "id": "gnews_llm",
+      "name": "Google News \u00b7 LLMs",
+      "kind": "gnews",
+      "url": "https://news.google.com/rss/search?q=(OpenAI+OR+Anthropic+OR+LLM+OR+%22Google+Gemini%22)+when:1d&hl=en-US&gl=US&ceid=US:en",
+      "weight": 1.5,
+      "cat": "ai"
+    },
+    {
+      "id": "hn_front",
+      "name": "Hacker News",
+      "kind": "hn",
+      "url": "https://hn.algolia.com/api/v1/search?tags=front_page&numericFilters=points%3E80&hitsPerPage=50",
+      "weight": 3,
+      "cat": "ai"
+    },
+    {
+      "id": "hn_llm",
+      "name": "Hacker News \u00b7 LLM",
+      "kind": "hn",
+      "url": "https://hn.algolia.com/api/v1/search_by_date?query=LLM&tags=story&numericFilters=points%3E50&hitsPerPage=40",
+      "weight": 2.5,
+      "cat": "ai"
+    },
+    {
+      "id": "lobsters",
+      "name": "Lobsters AI",
+      "kind": "rss",
+      "url": "https://lobste.rs/t/ai.rss",
+      "weight": 2,
+      "cat": "ai"
+    },
+    {
+      "id": "ghtrend",
+      "name": "GitHub Trending",
+      "kind": "rss",
+      "url": "https://mshibanami.github.io/GitHubTrendingRSS/daily/all.xml",
+      "weight": 2,
+      "require": "dev_gate",
+      "cat": "ai"
+    },
+    {
+      "id": "gamedeveloper",
+      "name": "Game Developer",
+      "kind": "rss",
+      "url": "https://www.gamedeveloper.com/rss.xml",
+      "weight": 3,
+      "require": "dev_gate",
+      "cat": "game"
+    },
+    {
+      "id": "unity_blog",
+      "name": "Unity Blog",
+      "kind": "rss",
+      "url": "https://blog.unity.com/feed",
+      "weight": 3,
+      "require": "dev_gate",
+      "cat": "game"
+    },
+    {
+      "id": "godot_blog",
+      "name": "Godot Engine Blog",
+      "kind": "rss",
+      "url": "https://godotengine.org/rss.xml",
+      "weight": 3,
+      "require": "dev_gate",
+      "cat": "game"
+    },
+    {
+      "id": "pcgamer",
+      "name": "PC Gamer",
+      "kind": "rss",
+      "url": "https://www.pcgamer.com/rss/",
+      "weight": 2,
+      "require": "dev_gate",
+      "cat": "game"
+    },
+    {
+      "id": "rockpapershotgun",
+      "name": "Rock Paper Shotgun",
+      "kind": "rss",
+      "url": "https://www.rockpapershotgun.com/feed",
+      "weight": 2,
+      "require": "dev_gate",
+      "cat": "game"
+    },
+    {
+      "id": "ign",
+      "name": "IGN",
+      "kind": "rss",
+      "url": "https://feeds.feedburner.com/ign/all",
+      "weight": 2,
+      "require": "dev_gate",
+      "cat": "game"
+    },
+    {
+      "id": "indie_dev",
+      "name": "r/gamedev (HN)",
+      "kind": "hn",
+      "url": "https://hn.algolia.com/api/v1/search_by_date?query=game+development&tags=story&numericFilters=points%3E50&hitsPerPage=40",
+      "weight": 2,
+      "require": "dev_gate",
+      "cat": "game"
+    },
+    {
+      "id": "verge_tech",
+      "name": "The Verge Tech",
+      "kind": "rss",
+      "url": "https://www.theverge.com/rss/index.xml",
+      "weight": 2.5,
+      "require": "dev_gate",
+      "cat": "app"
+    },
+    {
+      "id": "techcrunch_app",
+      "name": "TechCrunch Apps",
+      "kind": "rss",
+      "url": "https://techcrunch.com/category/apps/feed/",
+      "weight": 2.5,
+      "require": "dev_gate",
+      "cat": "app"
+    },
+    {
+      "id": "macrumors",
+      "name": "MacRumors",
+      "kind": "rss",
+      "url": "https://feeds.macrumors.com/MacRumors-All",
+      "weight": 2,
+      "require": "dev_gate",
+      "cat": "app"
+    },
+    {
+      "id": "9to5mac",
+      "name": "9to5Mac",
+      "kind": "rss",
+      "url": "https://9to5mac.com/feed/",
+      "weight": 2,
+      "require": "dev_gate",
+      "cat": "app"
+    },
+    {
+      "id": "ars_tech",
+      "name": "Ars Technica",
+      "kind": "rss",
+      "url": "https://feeds.arstechnica.com/arstechnica/technology-lab",
+      "weight": 2.5,
+      "require": "dev_gate",
+      "cat": "app"
+    },
+    {
+      "id": "android_dev",
+      "name": "Android Developers Blog",
+      "kind": "rss",
+      "url": "https://android-developers.googleblog.com/feeds/posts/default",
+      "weight": 2.5,
+      "require": "dev_gate",
+      "cat": "app"
+    },
+    {
+      "id": "apple_dev",
+      "name": "Apple Developer News",
+      "kind": "rss",
+      "url": "https://developer.apple.com/news/rss/news.rss",
+      "weight": 2.5,
+      "require": "dev_gate",
+      "cat": "app"
+    },
+    {
+      "id": "app_store",
+      "name": "App Store Top Free (US)",
+      "kind": "rss",
+      "url": "https://rss.applemarketingtools.com/api/v2/us/apps/top-free/50/apps.rss",
+      "weight": 1.5,
+      "require": "dev_gate",
+      "cat": "app"
+    },
+    {
+      "id": "producthunt",
+      "name": "Product Hunt",
+      "kind": "rss",
+      "url": "https://www.producthunt.com/feed",
+      "weight": 2,
+      "require": "dev_gate",
+      "cat": "app"
+    },
+    {
+      "id": "css_tricks",
+      "name": "CSS-Tricks",
+      "kind": "rss",
+      "url": "https://css-tricks.com/feed/",
+      "weight": 3,
+      "require": "dev_gate",
+      "cat": "web"
+    },
+    {
+      "id": "smashing",
+      "name": "Smashing Magazine",
+      "kind": "rss",
+      "url": "https://www.smashingmagazine.com/feed/",
+      "weight": 3,
+      "require": "dev_gate",
+      "cat": "web"
+    },
+    {
+      "id": "mdn_blog",
+      "name": "MDN Blog",
+      "kind": "rss",
+      "url": "https://developer.mozilla.org/en-US/blog/rss.xml",
+      "weight": 3,
+      "require": "dev_gate",
+      "cat": "web"
+    },
+    {
+      "id": "webdev_blog",
+      "name": "web.dev",
+      "kind": "rss",
+      "url": "https://web.dev/feed.xml",
+      "weight": 2.5,
+      "require": "dev_gate",
+      "cat": "web"
+    },
+    {
+      "id": "hn_web",
+      "name": "r/webdev (HN)",
+      "kind": "hn",
+      "url": "https://hn.algolia.com/api/v1/search_by_date?query=web+development&tags=story&numericFilters=points%3E50&hitsPerPage=40",
+      "weight": 2,
+      "require": "dev_gate",
+      "cat": "web"
+    },
+    {
+      "id": "tc_web",
+      "name": "TechCrunch",
+      "kind": "rss",
+      "url": "https://techcrunch.com/feed/",
+      "weight": 2,
+      "require": "dev_gate",
+      "cat": "web"
+    },
+    {
+      "id": "github_blog",
+      "name": "GitHub Engineering",
+      "kind": "rss",
+      "url": "https://github.blog/engineering/feed/",
+      "weight": 2.5,
+      "require": "dev_gate",
+      "cat": "web"
+    },
+    {
+      "id": "vercel_blog",
+      "name": "Vercel Blog",
+      "kind": "rss",
+      "url": "https://vercel.com/atom",
+      "weight": 2.5,
+      "require": "dev_gate",
+      "cat": "web"
+    },
+    {
+      "id": "cssweekly",
+      "name": "CSS Weekly",
+      "kind": "rss",
+      "url": "https://css-weekly.com/feed/",
+      "weight": 2.5,
+      "require": "dev_gate",
+      "cat": "web"
+    },
+    {
+      "id": "frontend_focus",
+      "name": "Frontend Focus",
+      "kind": "rss",
+      "url": "https://frontendfoc.us/rss",
+      "weight": 2.5,
+      "require": "dev_gate",
+      "cat": "web"
+    }
   ]
 }

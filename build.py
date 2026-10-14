@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Dev Pulse — zero-cost, self-updating dev news site (game/app/art/web).
+"""AI Pulse — zero-cost, self-updating AI-dev news site (ai/game/web/app).
 
 Fetches ~45 keyless sources (lab blogs, AI press, newsletters, Hacker News,
 Hugging Face Daily Papers, arXiv, Google News), cleans + dedupes + categorizes,
@@ -50,7 +50,7 @@ TZ = timezone(timedelta(hours=7))            # Metin's timezone (UTC+7, no DST)
 UTC = timezone.utc
 NOW = datetime.now(UTC)
 
-UA = "Mozilla/5.0 (compatible; DevPulse/1.0; +https://github.com)"
+UA = "Mozilla/5.0 (compatible; AIPulse/1.0; +https://github.com)"
 REPO_URL = os.environ.get("REPO_URL", "https://github.com").rstrip("/")
 SITE_URL = os.environ.get("SITE_URL", REPO_URL).rstrip("/")
 
@@ -65,12 +65,12 @@ TRACKING_PARAMS = re.compile(
     r"^(utm_|ref$|ref_|fbclid|gclid|mc_cid|mc_eid|igshid|s=|t=|si=|$)", re.I)
 
 CATEGORIES = {
-    "game": ("Game Dev",   "#6C5CE7"),
-    "app":  ("App Dev",    "#00D2FF"),
-    "art":  ("Art Dev",    "#FF6B9D"),
-    "web":  ("Web Dev",    "#4ADE80"),
+    "ai":   ("AI & ML",      "#6C5CE7"),
+    "game": ("Game Dev",     "#00D2FF"),
+    "web":  ("Web Dev",      "#FF6B9D"),
+    "app":  ("App Dev",      "#4ADE80"),
 }
-CAT_PRIORITY = ["game", "app", "art", "web"]
+CAT_PRIORITY = ["ai", "game", "web", "app"]
 
 # -------- Vertical gate: each must match one of these on title+snippet --------
 GAME_RE = re.compile(
@@ -407,12 +407,8 @@ WEB_RE = re.compile(
     r"view\s*transition-)"
     r"\b", re.I)
 
-# Combined gate — post must match at least one vertical
-DEV_RE = re.compile("|".join([GAME_RE.pattern, APP_RE.pattern, ART_RE.pattern, WEB_RE.pattern]), re.I)
-
-# Legacy aliases (no longer used; keep imports quiet)
-HN_AI_RE = DEV_RE
-ARXIV_KEEP_RE = DEV_RE
+# (DEV_RE / DEV_GATE / REQUIRE_RES are defined later, after AI_RE is set)
+# (Legacy HN_AI_RE / ARXIV_KEEP_RE aliases also defined later, after AI_RE.)
 GNEWS_NOISE_RE = re.compile(
     r"\b(horoscope|editorial\s*cartoon|match\s*preview|"
     r"live\s*score|betting\s*tips?|lineup\s*prediction|"
@@ -421,10 +417,6 @@ GNEWS_NOISE_RE = re.compile(
     r"celebrity\s*gossip|kardashian|"
     r"fashion\s*week\s*celebrity|red\s*carpet\s*gossip)\b", re.I)
 
-# Content gate (replaces the old AI-only gate)
-DEV_GATE = DEV_RE
-REQUIRE_RES = {"dev_gate": DEV_GATE}
-
 STOPWORDS = {"the", "and", "for", "with", "that", "this", "from", "your", "you", "are", "was",
              "how", "why", "what", "when", "where", "who", "will", "can", "its", "it's", "has",
              "have", "new", "now", "out", "but", "not", "all", "one", "two", "get", "gets", "via",
@@ -432,19 +424,8 @@ STOPWORDS = {"the", "and", "for", "with", "that", "this", "from", "your", "you",
              "more", "most", "other", "some", "such", "only", "over", "also", "been", "were", "his",
              "her", "our", "uses", "using", "use", "way", "day", "days", "week", "today"}
 
-HN_AI_RE = re.compile(
-    r"\b(ai|a\.i\.|llm|llms|gpt|chatgpt|openai|anthropic|claude|gemini|deepmind|mistral|llama|"
-    r"machine learning|deep learning|neural|transformer|diffusion|ai agents?|copilot|cursor|"
-    r"prompt|rag\b|embedding|fine.?tun|hugging ?face|inference|robots?|gpu|nvidia|cuda|"
-    r"reasoning model|foundation model|generative|text.to.\w+|image model|voice model|speech model)\b",
-    re.I)
-
-ARXIV_KEEP_RE = re.compile(
-    r"\b(llm|large language|language model|agent|reasoning|benchmark|diffusion|transformer|"
-    r"multimodal|retrieval|rlhf|rlvr|fine.tun|instruction|prompt|inference|efficien|distill|"
-    r"vision.language|tool use|alignment|safety|world model|robot|code|math|planning|memory|"
-    r"long.context|mixture.of.experts|moe\b|quantiz|speculative|chain.of.thought|test.time)\b",
-    re.I)
+# Legacy aliases — defined later, after AI_RE is set.
+# (HN_AI_RE for HN algolia filter, ARXIV_KEEP_RE for arxiv filter; both alias to AI_RE.)
 
 # Google-News-only noise: horoscopes (the zodiac sign "Gemini"), cartoon captions,
 # sports "AI predictions" SEO spam — none of it is AI-news.
@@ -460,6 +441,23 @@ GH_KEEP_RE = re.compile(
     r"openai|anthropic|claude|gemini|llama|mistral|copilot|cursor|deepseek|qwen|ollama|"
     r"prompt|langchain|vector|models?)\b",
     re.I)
+# AI vertical regex — same pattern as the original AI Pulse gate.
+# Hits: AI/ML/LLM/vendors/techniques. Used for the `ai` vertical and as the
+# default "is this AI-news?" check on broad sources like GitHub Trending.
+AI_RE = GH_KEEP_RE
+
+# Legacy aliases — point to the new AI_RE gate.
+# HN_AI_RE: per-HN-source filter (article must mention AI terms)
+# ARXIV_KEEP_RE: per-arxiv-source filter (article must be AI/ML-relevant)
+HN_AI_RE = AI_RE
+ARXIV_KEEP_RE = AI_RE
+
+# Combined gate — post must match at least one vertical: ai | game | web | app
+DEV_RE = re.compile("|".join([AI_RE.pattern, GAME_RE.pattern, WEB_RE.pattern, APP_RE.pattern]), re.I)
+
+# Content gate (replaces the old AI-only gate) — alias used by the per-source `require: dev_gate` check
+DEV_GATE = DEV_RE
+REQUIRE_RES = {"dev_gate": DEV_GATE}
 # Populated by load_sources(): source id -> require flag (for history purging too)
 REQUIRE_BY_ID: dict = {}
 
@@ -782,7 +780,7 @@ FETCHERS = {"rss": fetch_rss, "arxiv": fetch_arxiv, "gnews": fetch_gnews,
 # Categorize / score
 # --------------------------------------------------------------------------
 
-CAT_RES = {"game": GAME_RE, "app": APP_RE, "art": ART_RE, "web": WEB_RE}
+CAT_RES = {"ai": AI_RE, "game": GAME_RE, "web": WEB_RE, "app": APP_RE}
 
 
 def categorize(a: dict) -> str:
@@ -801,12 +799,12 @@ def categorize(a: dict) -> str:
     scores = {cat: len(p.findall(text)) for cat, p in CAT_RES.items()}
     scores = {k: v for k, v in scores.items() if v > 0}
     if not scores:
-        return "web"  # soft default (one of 4 must match by gate)
+        return "ai"  # soft default (one of 4 must match by gate)
     best = max(scores.values())
     for cat in CAT_PRIORITY:
         if scores.get(cat, 0) == best:
             return cat
-    return "web"
+    return "ai"
 
 
 def hot_score(a: dict) -> float:
@@ -826,11 +824,11 @@ def hot_score(a: dict) -> float:
 # --------------------------------------------------------------------------
 
 DIGEST_SYSTEM = (
-    "You are the editor of \"Dev Pulse\", a daily dev-news dashboard for working "
-    "developers in four verticals: game development, app development, art development, "
-    "and website development. Write a tight executive briefing from the numbered stories. "
-    "Be specific and factual: tool names, version numbers, studio names, framework versions. "
-    "No hype, no filler. "
+    "You are the editor of \"AI Pulse\", a daily AI-dev news dashboard for software "
+    "engineers who build with AI. Coverage spans AI/ML news, game dev, web dev, "
+    "and app dev — anything an AI developer needs to stay current. Write a tight "
+    "executive briefing from the numbered stories. Be specific and factual: tool "
+    "names, version numbers, model names, framework versions. No hype, no filler. "
     'Respond with ONLY minified JSON: {"intro": "one-sentence overview of the day", '
     '"stories": [{"i": <story number>, "why": "one punchy sentence: why this matters"}]}. '
     "Pick the 6-8 most important stories, most important first; if several outlets cover the same event, keep only the strongest one. Keep each 'why' under 140 chars."
@@ -947,7 +945,7 @@ def day_label(dt: datetime) -> tuple[str, str]:
 
 
 def render_card(a: dict) -> str:
-    cat_name, cat_col = CATEGORIES.get(a["cat"], CATEGORIES["web"])
+    cat_name, cat_col = CATEGORIES.get(a["cat"], CATEGORIES["ai"])
     dt = dt_from_iso(a["ts"])
     epoch = int(dt.timestamp())
     search_blob = e((a["title"] + " " + a.get("snippet", ""))[:300])
@@ -1038,7 +1036,7 @@ def item_allowed(a: dict) -> bool:
     sid = a.get("source_id") or ""
     if sid.startswith("gnews") and GNEWS_NOISE_RE.search(a["title"]):
         return False
-    # Strict dev-vertical gate: title+snippet must hit GAME_RE|APP_RE|ART_RE|WEB_RE
+    # Strict dev-vertical gate: title+snippet must hit AI_RE|GAME_RE|WEB_RE|APP_RE
     if not DEV_RE.search(a["title"] + " " + (a.get("snippet") or "")):
         return False
     return True
@@ -1170,7 +1168,7 @@ def render_digest(articles: list[dict]) -> tuple[str, str, set]:
 def build():
     t0 = time.time()
     sources = load_sources()
-    print(f"Dev Pulse build — {NOW.astimezone(TZ).strftime('%Y-%m-%d %H:%M %Z')} "
+    print(f"AI Pulse build — {NOW.astimezone(TZ).strftime('%Y-%m-%d %H:%M %Z')} "
           f"| {len(sources)} sources")
     fetched, stats = fetch_all(sources)
     articles, new_count = merge_history(fetched)
@@ -1231,7 +1229,7 @@ def build():
         '<link rel="manifest" href="manifest.webmanifest">'
         '<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">'
         '<link rel="mask-icon" href="assets/mask-icon.svg" color="#6C5CE7">'
-        '<meta name="apple-mobile-web-app-title" content="Dev Pulse">'
+        '<meta name="apple-mobile-web-app-title" content="AI Pulse">'
         '<meta name="apple-mobile-web-app-capable" content="yes">'
         '<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">'
         '<meta name="mobile-web-app-capable" content="yes">'
@@ -1239,8 +1237,8 @@ def build():
         '<meta property="og:image" content="assets/og-image.png">'
         '<meta name="twitter:card" content="summary_large_image">'
         '<meta name="twitter:image" content="assets/og-image.png">'
-        '<meta name="twitter:title" content="Dev Pulse — every dev signal, one page">'
-        '<meta name="twitter:description" content="Auto-curated dev news for game, app, art and web development, refreshed every 4 hours. $0 forever.">'
+        '<meta name="twitter:title" content="AI Pulse — every AI-dev signal, one page">'
+        '<meta name="twitter:description" content="AI, game, web, and app dev news for AI devs — auto-curated every 4 hours. $0 forever.">'
     )
     page = page.replace("<link rel=\"alternate\"", head_extras + "<link rel=\"alternate\"", 1)
     (SITE / "index.html").write_text(page, encoding="utf-8")
@@ -1277,9 +1275,9 @@ def build():
             "</item>")
     feed = ('<?xml version="1.0" encoding="UTF-8"?>\n'
             '<rss version="2.0"><channel>'
-            "<title>Dev Pulse</title>"
+            "<title>AI Pulse</title>"
             f"<link>{saxutils.escape(SITE_URL)}</link>"
-            "<description>Game, app, art, web dev news — auto-curated every 4 hours.</description>"
+            "<description>AI, game, web, app dev news — auto-curated every 4 hours.</description>"
             f"<lastBuildDate>{format_datetime(NOW)}</lastBuildDate>"
             + "".join(rss_items) + "</channel></rss>")
     (SITE / "feed.xml").write_text(feed, encoding="utf-8")
@@ -1287,9 +1285,9 @@ def build():
 
     # ---------- PWA artifacts ----------
     (SITE / "manifest.webmanifest").write_text(json.dumps({
-        "name": "Dev Pulse — every dev signal, one page",
-        "short_name": "Dev Pulse",
-        "description": "Auto-curated dev news for game, app, art and web development, refreshed every 4 hours. $0 forever.",
+        "name": "AI Pulse — every AI-dev signal, one page",
+        "short_name": "AI Pulse",
+        "description": "AI, game, web, and app dev news for AI devs — auto-curated every 4 hours. $0 forever.",
         "start_url": "./",
         "scope": "./",
         "display": "standalone",
@@ -1305,7 +1303,7 @@ def build():
 
     # service worker (cache-shell, network-first for articles.json, swr for feed.xml)
     (SITE / "sw.js").write_text((
-        "const CACHE = 'dev-pulse-v1';\n"
+        "const CACHE = 'ai-pulse-v3';\n"
         "const PRECACHE = ['./', 'index.html', 'articles.json', 'feed.xml', 'manifest.webmanifest', "
         "'assets/apple-touch-icon.png', 'assets/og-image.png', 'favicon-32.png', 'favicon-192.png'];\n"
         "self.addEventListener('install', e => { self.skipWaiting(); "
@@ -1394,8 +1392,8 @@ def build():
                 od.ellipse((cx - r, cy - r, cx + r, cy + r), outline=col)
         # title
         f1 = _font(98); f2 = _font(40)
-        od.text((72, 200), "Dev Pulse", fill=(240, 240, 250), font=f1)
-        od.text((72, 320), "Game. App. Art. Web. One dev feed. Zero noise.", fill=(0, 210, 255), font=f2)
+        od.text((72, 200), "AI Pulse", fill=(240, 240, 250), font=f1)
+        od.text((72, 320), "AI. Game. Web. App. Every dev signal. One page.", fill=(0, 210, 255), font=f2)
         od.text((72, 400), f"%%SOURCES_TOTAL%% sources · 4 verticals · $0 forever", fill=(154, 154, 180), font=f2)
         od.text((72, 540), "wetiu.github.io/ai-pulse-deephermes", fill=(108, 92, 231), font=f2)
         og.save(assets / "og-image.png")
